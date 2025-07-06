@@ -12,23 +12,23 @@ router = APIRouter()
 # Initialize services
 cache_service = service_factory.get_cache_service()
 
-@router.get("/")
+@router.get("/", tags=["Admin"])
 async def root():
     """Health check endpoint"""
     return {"message": "Slide Generator API is running"}
 
-@router.get("/api/v1/cache/stats")
+@router.get("/api/v1/cache/stats", tags=["Admin"])
 async def get_cache_stats():
     """Get cache statistics"""
     return cache_service.get_cache_stats()
 
-@router.post("/api/v1/cache/clear")
+@router.post("/api/v1/cache/clear", tags=["Admin"])
 async def clear_cache():
     """Clear all caches"""
     cache_service.clear_all()
     return {"message": "All caches cleared"}
 
-@router.get("/api/v1/llm/status")
+@router.get("/api/v1/llm/status", tags=["Admin"])
 async def get_llm_status():
     """Get current LLM service status"""
     current_llm = service_factory.get_llm_service()
@@ -38,12 +38,12 @@ async def get_llm_status():
         "is_dummy": "DummyLLM" in type(current_llm).__name__
     }
 
-@router.get("/api/v1/concurrency/stats")
+@router.get("/api/v1/concurrency/stats", tags=["Admin"])
 async def get_concurrency_stats():
     """Get concurrency statistics"""
     return concurrency_controller.get_concurrency_stats()
 
-@router.post("/api/v1/llm/switch")
+@router.post("/api/v1/llm/switch", tags=["Admin"])
 async def switch_llm_service(llm_type: str = "dummy", api_key: Optional[str] = None):
     """Switch LLM service implementation"""
     try:

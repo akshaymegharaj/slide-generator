@@ -47,7 +47,7 @@ def apply_theme_defaults(presentation, theme, font=None, colors=None):
             presentation.colors = colors
     return presentation
 
-@router.post("/", response_model=Presentation)
+@router.post("/", response_model=Presentation, tags=["Presentation"])
 async def create_presentation(
     presentation: PresentationCreate,
     session: AsyncSession = Depends(get_session)
@@ -95,7 +95,7 @@ async def create_presentation(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create presentation: {str(e)}")
 
-@router.get("/", response_model=List[Presentation])
+@router.get("/", response_model=List[Presentation], tags=["Presentation"])
 async def list_presentations(
     limit: int = 100,
     offset: int = 0,
@@ -108,7 +108,7 @@ async def list_presentations(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list presentations: {str(e)}")
 
-@router.get("/search/{topic}", response_model=List[Presentation])
+@router.get("/search/{topic}", response_model=List[Presentation], tags=["Presentation"])
 async def search_presentations(
     topic: str,
     session: AsyncSession = Depends(get_session)
@@ -120,7 +120,7 @@ async def search_presentations(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to search presentations: {str(e)}")
 
-@router.get("/{presentation_id}", response_model=Presentation)
+@router.get("/{presentation_id}", response_model=Presentation, tags=["Presentation"])
 async def get_presentation(
     presentation_id: str,
     session: AsyncSession = Depends(get_session)
@@ -136,7 +136,7 @@ async def get_presentation(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve presentation: {str(e)}")
 
-@router.delete("/{presentation_id}")
+@router.delete("/{presentation_id}", tags=["Presentation"])
 async def delete_presentation(
     presentation_id: str,
     session: AsyncSession = Depends(get_session)
@@ -152,7 +152,7 @@ async def delete_presentation(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to delete presentation: {str(e)}")
 
-@router.get("/{presentation_id}/download")
+@router.get("/{presentation_id}/download", tags=["Presentation"])
 async def download_presentation(
     presentation_id: str,
     session: AsyncSession = Depends(get_session)
@@ -190,7 +190,7 @@ async def download_presentation(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to download presentation: {str(e)}")
 
-@router.post("/{presentation_id}/configure", response_model=Presentation)
+@router.post("/{presentation_id}/configure", response_model=Presentation, tags=["Presentation"])
 async def configure_presentation(
     presentation_id: str,
     config: PresentationConfig,

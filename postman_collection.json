@@ -2,40 +2,29 @@
   "info": {
     "_postman_id": "slide-generator-api-collection",
     "name": "Slide Generator API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection for Slide Generator API with test API key in headers."
   },
   "item": [
-    {
-      "name": "Health Check",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": { "raw": "{{base_url}}/", "host": ["{{base_url}}"], "path": [""] }
-      }
-    },
     {
       "name": "Create Presentation",
       "request": {
         "method": "POST",
         "header": [
-          { "key": "Authorization", "value": "Bearer {{api_key}}", "type": "text" },
-          { "key": "Content-Type", "value": "application/json", "type": "text" }
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-API-Key", "value": "test-api-key-123" }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"topic\": \"API Demo\",\n  \"num_slides\": 3,\n  \"aspect_ratio\": \"16:9\"\n}"
+          "raw": "{\n  \"topic\": \"Machine Learning Basics\",\n  \"num_slides\": 5\n}"
         },
-        "url": { "raw": "{{base_url}}/api/v1/presentations", "host": ["{{base_url}}"], "path": ["api", "v1", "presentations"] }
-      }
-    },
-    {
-      "name": "Get Presentation",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{api_key}}", "type": "text" }
-        ],
-        "url": { "raw": "{{base_url}}/api/v1/presentations/{{presentation_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "presentations", "{{presentation_id}}"] }
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations"]
+        }
       }
     },
     {
@@ -43,9 +32,47 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "Authorization", "value": "Bearer {{api_key}}", "type": "text" }
+          { "key": "X-API-Key", "value": "test-api-key-123" }
         ],
-        "url": { "raw": "{{base_url}}/api/v1/presentations", "host": ["{{base_url}}"], "path": ["api", "v1", "presentations"] }
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations"]
+        }
+      }
+    },
+    {
+      "name": "Get Presentation",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "test-api-key-123" }
+        ],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations/{{presentation_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations", "{{presentation_id}}"]
+        }
+      }
+    },
+    {
+      "name": "Download Presentation PPTX",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-API-Key", "value": "test-api-key-123" }
+        ],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations/{{presentation_id}}/download",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations", "{{presentation_id}}", "download"]
+        }
       }
     },
     {
@@ -53,95 +80,24 @@
       "request": {
         "method": "POST",
         "header": [
-          { "key": "Authorization", "value": "Bearer {{api_key}}", "type": "text" },
-          { "key": "Content-Type", "value": "application/json", "type": "text" }
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-API-Key", "value": "test-api-key-123" }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"theme\": \"minimal\",\n  \"aspect_ratio\": \"4:3\"\n}"
+          "raw": "{\n  \"theme\": \"modern\",\n  \"aspect_ratio\": \"16:9\"\n}"
         },
-        "url": { "raw": "{{base_url}}/api/v1/presentations/{{presentation_id}}/configure", "host": ["{{base_url}}"], "path": ["api", "v1", "presentations", "{{presentation_id}}", "configure"] }
-      }
-    },
-    {
-      "name": "Download Presentation",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{api_key}}", "type": "text" }
-        ],
-        "url": { "raw": "{{base_url}}/api/v1/presentations/{{presentation_id}}/download", "host": ["{{base_url}}"], "path": ["api", "v1", "presentations", "{{presentation_id}}", "download"] }
-      }
-    },
-    {
-      "name": "Get Aspect Ratios",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{api_key}}", "type": "text" }
-        ],
-        "url": { "raw": "{{base_url}}/api/v1/aspect-ratios", "host": ["{{base_url}}"], "path": ["api", "v1", "aspect-ratios"] }
-      }
-    },
-    {
-      "name": "Cache Stats",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{api_key}}", "type": "text" }
-        ],
-        "url": { "raw": "{{base_url}}/api/v1/cache/stats", "host": ["{{base_url}}"], "path": ["api", "v1", "cache", "stats"] }
-      }
-    },
-    {
-      "name": "Clear Cache",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{api_key}}", "type": "text" }
-        ],
-        "url": { "raw": "{{base_url}}/api/v1/cache/clear", "host": ["{{base_url}}"], "path": ["api", "v1", "cache", "clear"] }
-      }
-    },
-    {
-      "name": "LLM Status",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{api_key}}", "type": "text" }
-        ],
-        "url": { "raw": "{{base_url}}/api/v1/llm/status", "host": ["{{base_url}}"], "path": ["api", "v1", "llm", "status"] }
-      }
-    },
-    {
-      "name": "Switch LLM Service",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{api_key}}", "type": "text" },
-          { "key": "Content-Type", "value": "application/json", "type": "text" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"llm_type\": \"dummy\"\n}"
-        },
-        "url": { "raw": "{{base_url}}/api/v1/llm/switch", "host": ["{{base_url}}"], "path": ["api", "v1", "llm", "switch"] }
-      }
-    },
-    {
-      "name": "Concurrency Stats",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{api_key}}", "type": "text" }
-        ],
-        "url": { "raw": "{{base_url}}/api/v1/concurrency/stats", "host": ["{{base_url}}"], "path": ["api", "v1", "concurrency", "stats"] }
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations/{{presentation_id}}/configure",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations", "{{presentation_id}}", "configure"]
+        }
       }
     }
   ],
   "variable": [
-    { "key": "base_url", "value": "http://localhost:8000" },
-    { "key": "api_key", "value": "demo-api-key-12345" },
-    { "key": "presentation_id", "value": "" }
+    { "key": "presentation_id", "value": "<replace-with-id>" }
   ]
 } 

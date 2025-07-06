@@ -12,12 +12,14 @@ from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 
 from app.models.presentation import Presentation, Slide, SlideType, Theme
+from app.services.cache import CacheService
 
 class SlideGenerator:
     """Service for generating slides and creating PPTX files"""
     
-    def __init__(self):
+    def __init__(self, cache_service: CacheService):
         self.output_dir = "output"
+        self.cache = cache_service
         os.makedirs(self.output_dir, exist_ok=True)
     
     async def generate_slides(
@@ -30,8 +32,25 @@ class SlideGenerator:
         colors: Optional[Dict[str, str]] = None
     ) -> List[Slide]:
         """
-        Generate slides for a given topic
+        Generate slides for a given topic with caching
         """
+        # Check cache first
+        cache_key_params = {
+            'topic': topic,
+            'num_slides': num_slides,
+            'custom_content': custom_content,
+            'theme': theme.value if theme else None,
+            'font': font,
+            'colors': colors
+        }
+        
+        cached_result = self.cache.get_slide_generation(**cache_key_params)
+        if cached_result and "slides" in cached_result:
+            # Convert cached data back to Slide objects
+            slides = [Slide(**slide_data) for slide_data in cached_result["slides"]]
+            return slides
+        
+        # Generate slides if not in cache
         slides = []
         
         # Generate title slide
@@ -50,6 +69,10 @@ class SlideGenerator:
                 topic, remaining_slides, custom_content
             )
             slides.extend(content_slides)
+        
+        # Cache the result
+        slides_data = [slide.model_dump() for slide in slides]
+        self.cache.set_slide_generation(result={"slides": slides_data}, **cache_key_params)
         
         return slides
     

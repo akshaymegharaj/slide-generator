@@ -41,5 +41,9 @@ app/settings.py
 output/
 temp/
 
+# Database files
+*.db
+test_*.db
+
 # Logs
 *.log

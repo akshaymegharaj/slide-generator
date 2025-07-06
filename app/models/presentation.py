@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from enum import Enum
 from app.config.themes import Theme, ThemeConfig
+from app.config.aspect_ratios import AspectRatio, AspectRatioConfig
 
 class SlideType(str, Enum):
     """Types of slides supported"""
@@ -35,6 +36,9 @@ class PresentationConfig(BaseModel):
         default_factory=lambda: ThemeConfig.get_theme_colors(Theme.MODERN),
         description="Color scheme"
     )
+    aspect_ratio: Optional[AspectRatio] = Field(AspectRatio.WIDESCREEN_16_9, description="Presentation aspect ratio")
+    custom_width: Optional[float] = Field(None, ge=5.0, le=20.0, description="Custom width in inches (for custom aspect ratio)")
+    custom_height: Optional[float] = Field(None, ge=5.0, le=20.0, description="Custom height in inches (for custom aspect ratio)")
 
 class Presentation(BaseModel):
     """Complete presentation model"""
@@ -48,5 +52,8 @@ class Presentation(BaseModel):
     colors: Dict[str, str] = Field(
         default_factory=lambda: ThemeConfig.get_theme_colors(Theme.MODERN)
     )
+    aspect_ratio: AspectRatio = AspectRatio.WIDESCREEN_16_9
+    custom_width: Optional[float] = None
+    custom_height: Optional[float] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None 

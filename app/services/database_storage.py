@@ -142,6 +142,9 @@ class DatabaseStorage(StorageInterface):
                 theme=presentation_db.theme,
                 font=presentation_db.font,
                 colors=presentation_db.colors,
+                aspect_ratio=presentation_db.aspect_ratio,
+                custom_width=presentation_db.custom_width,
+                custom_height=presentation_db.custom_height,
                 created_at=presentation_db.created_at.isoformat() if presentation_db.created_at else None,
                 updated_at=presentation_db.updated_at.isoformat() if presentation_db.updated_at else None
             )
@@ -216,6 +219,9 @@ class DatabaseStorage(StorageInterface):
                     theme=presentation_db.theme,
                     font=presentation_db.font,
                     colors=presentation_db.colors,
+                    aspect_ratio=presentation_db.aspect_ratio,
+                    custom_width=presentation_db.custom_width,
+                    custom_height=presentation_db.custom_height,
                     created_at=presentation_db.created_at.isoformat() if presentation_db.created_at else None,
                     updated_at=presentation_db.updated_at.isoformat() if presentation_db.updated_at else None
                 )
@@ -266,6 +272,9 @@ class DatabaseStorage(StorageInterface):
                     theme=presentation_db.theme,
                     font=presentation_db.font,
                     colors=presentation_db.colors,
+                    aspect_ratio=presentation_db.aspect_ratio,
+                    custom_width=presentation_db.custom_width,
+                    custom_height=presentation_db.custom_height,
                     created_at=presentation_db.created_at.isoformat() if presentation_db.created_at else None,
                     updated_at=presentation_db.updated_at.isoformat() if presentation_db.updated_at else None
                 )

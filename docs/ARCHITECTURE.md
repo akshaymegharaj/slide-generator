@@ -17,13 +17,16 @@ app/
 │   ├── dummy_llm.py     # Dummy LLM for testing/development
 │   ├── factory.py       # Service factory for dependency injection
 │   ├── slide_generator.py   # Main slide generation logic
-│   └── storage.py       # Storage service wrapper
-├── examples/            # POC and example implementations
-│   ├── openai_llm.py    # OpenAI GPT implementation
-│   └── redis_cache.py   # Redis cache implementation
+│   ├── storage.py       # Storage service wrapper
+│   └── impl/            # Service implementations
+│       ├── openai_llm.py # OpenAI GPT implementation
+│       └── redis_cache.py # Redis cache implementation
 ├── models/              # Data models
 ├── main.py              # Admin API endpoints only
-├── presentation_api.py  # Presentation-related endpoints
+├── apis/                # API routes
+│   ├── system.py        # System endpoints (health, cache, LLM, concurrency)
+│   ├── config.py        # Configuration endpoints (aspect ratios)
+│   └── presentation_api.py  # Presentation-related endpoints
 └── settings.py          # Configuration (gitignored)
 ```
 
@@ -34,9 +37,9 @@ app/
 - Each interface focuses on a single responsibility
 - Easy to swap implementations without changing business logic
 
-### 2. Production vs Examples
+### 2. Production vs Implementations
 - **Services** (`app/services/`) contain production-ready implementations
-- **Examples** (`app/examples/`) contain POC and demonstration implementations
+- **Impl** (`app/services/impl/`) contain additional service implementations
 - Clear separation prevents confusion about what's production-ready
 
 ### 3. Dependency Injection
@@ -46,18 +49,20 @@ app/
 
 ### 4. Modular API Design
 - **Admin endpoints** (`app/main.py`) - health checks, cache management, LLM switching
-- **Business endpoints** (`app/presentation_api.py`) - presentation CRUD operations
+- **Business endpoints** (`app/apis/presentation_api.py`) - presentation CRUD operations
+- **System endpoints** (`app/apis/system.py`) - health check, cache, LLM, concurrency
+- **Configuration endpoints** (`app/apis/config.py`) - aspect ratios and config options
 - Clear separation of concerns
 
 ## Service Implementations
 
 ### LLM Services
 - **DummyLLM** (`app/services/dummy_llm.py`) - Production-ready dummy implementation for testing
-- **OpenAILLM** (`app/examples/openai_llm.py`) - Example OpenAI GPT implementation
+- **OpenAILLM** (`app/services/impl/openai_llm.py`) - OpenAI GPT implementation
 
 ### Cache Services  
 - **CacheService** (`app/services/cache.py`) - Production in-memory cache
-- **RedisCacheService** (`app/examples/redis_cache.py`) - Example Redis implementation
+- **RedisCacheService** (`app/services/impl/redis_cache.py`) - Redis implementation
 
 ### Storage Services
 - **DatabaseStorage** (`app/services/database_storage.py`) - Production SQLite storage
@@ -68,7 +73,7 @@ app/
 ### Switching LLM Implementation
 ```python
 from app.services.factory import service_factory
-from app.examples.openai_llm import OpenAILLM
+from app.services.impl.openai_llm import OpenAILLM
 
 # Switch to OpenAI
 openai_llm = OpenAILLM(api_key="your-key")

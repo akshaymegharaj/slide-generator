@@ -13,6 +13,7 @@ from pptx.dml.color import RGBColor
 
 from app.models.presentation import Presentation, Slide, SlideType
 from app.config.themes import Theme, ThemeConfig
+from app.config.aspect_ratios import AspectRatio, AspectRatioConfig
 from app.interfaces.cache import CacheInterface
 from app.interfaces.llm import LLMInterface
 
@@ -104,8 +105,14 @@ class SlideGenerator:
         # Create a new presentation
         pptx = PPTXPresentation()
         
-        # Apply theme and styling
-        self._apply_theme(pptx, presentation.theme)
+        # Apply theme and styling with aspect ratio
+        self._apply_theme(
+            pptx, 
+            presentation.theme, 
+            presentation.aspect_ratio,
+            presentation.custom_width,
+            presentation.custom_height
+        )
         
         # Create slides
         for slide_data in presentation.slides:
@@ -125,11 +132,22 @@ class SlideGenerator:
         
         return filepath
     
-    def _apply_theme(self, pptx: PPTXPresentation, theme: Theme):
-        """Apply theme to presentation with proper styling"""
-        # Set slide size and basic theme properties
-        pptx.slide_width = Inches(10)
-        pptx.slide_height = Inches(7.5)
+    def _apply_theme(self, pptx: PPTXPresentation, theme: Theme, aspect_ratio: AspectRatio = AspectRatio.WIDESCREEN_16_9, custom_width: Optional[float] = None, custom_height: Optional[float] = None):
+        """Apply theme to presentation with proper styling and aspect ratio"""
+        # Set slide size based on aspect ratio
+        if aspect_ratio == AspectRatio.CUSTOM and custom_width and custom_height:
+            # Use custom dimensions
+            width_inches, height_inches = Inches(custom_width), Inches(custom_height)
+        else:
+            # Use predefined aspect ratio dimensions
+            width_inches, height_inches = AspectRatioConfig.get_inches_dimensions(aspect_ratio)
+        
+        pptx.slide_width = width_inches
+        pptx.slide_height = height_inches
+        
+        # Store dimensions for use in slide creation
+        self._slide_width = width_inches
+        self._slide_height = height_inches
         
         # Get theme configuration from centralized config
         theme_config = ThemeConfig.get_theme_config(theme)
@@ -207,11 +225,21 @@ class SlideGenerator:
 
         # Combine all citations into a single string
         citations_text = "; ".join(citations)
-        # Add a textbox at the bottom of the slide
+        
+        # Calculate dynamic positioning based on slide dimensions
+        slide_width = getattr(self, '_slide_width', Inches(10))
+        slide_height = getattr(self, '_slide_height', Inches(7.5))
+        
+        # Convert to float for calculations
+        width_inches = float(slide_width.inches)
+        height_inches = float(slide_height.inches)
+        
+        # Position citations box at bottom with margins
         left = Inches(0.5)
-        width = Inches(9)
+        width = Inches(width_inches - 1.0)  # Full width minus margins
         height = Inches(0.5)
-        top = Inches(6.7)  # Near the bottom of a standard 7.5" slide
+        top = Inches(height_inches - 0.8)  # Near bottom with margin
+        
         textbox = slide.shapes.add_textbox(left, top, width, height)
         text_frame = textbox.text_frame
         text_frame.clear()
@@ -292,12 +320,31 @@ class SlideGenerator:
                 sp = shape._element
                 sp.getparent().remove(sp)
         
-        # Create two text boxes for columns with better positioning and sizing
-        # Left column: from 0.5" to 4.5" (4" width)
-        # Right column: from 4.5" to 8.5" (4" width)
-        # Leave 0.5" margin on each side
-        left_box = slide.shapes.add_textbox(Inches(0.5), Inches(2), Inches(3.8), Inches(4.5))
-        right_box = slide.shapes.add_textbox(Inches(4.7), Inches(2), Inches(3.8), Inches(4.5))
+        # Calculate dynamic column positioning based on slide dimensions
+        slide_width = getattr(self, '_slide_width', Inches(10))
+        slide_height = getattr(self, '_slide_height', Inches(7.5))
+        
+        width_inches = float(slide_width.inches)
+        height_inches = float(slide_height.inches)
+        
+        # Calculate column dimensions
+        margin = 0.5
+        column_width = (width_inches - 2 * margin - 0.5) / 2  # 0.5" gap between columns
+        column_height = height_inches - 2.5  # Leave space for title and bottom
+        
+        # Create two text boxes for columns with dynamic positioning
+        left_box = slide.shapes.add_textbox(
+            Inches(margin), 
+            Inches(2), 
+            Inches(column_width), 
+            Inches(column_height)
+        )
+        right_box = slide.shapes.add_textbox(
+            Inches(margin + column_width + 0.5), 
+            Inches(2), 
+            Inches(column_width), 
+            Inches(column_height)
+        )
         
         # Configure text frames for proper wrapping
         left_frame = left_box.text_frame

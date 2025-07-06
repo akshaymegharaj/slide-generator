@@ -6,6 +6,7 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
 from app.config.themes import Theme, ThemeConfig
+from app.config.aspect_ratios import AspectRatio, AspectRatioConfig
 
 class SlideType(str, Enum):
     """Types of slides supported"""
@@ -43,5 +44,8 @@ class PresentationDB(SQLModel, table=True):
         sa_column=Column(JSON),
         default_factory=lambda: ThemeConfig.get_theme_colors(Theme.MODERN)
     )
+    aspect_ratio: AspectRatio = Field(default=AspectRatio.WIDESCREEN_16_9)
+    custom_width: Optional[float] = Field(default=None, ge=5.0, le=20.0)
+    custom_height: Optional[float] = Field(default=None, ge=5.0, le=20.0)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow) 

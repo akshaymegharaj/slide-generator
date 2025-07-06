@@ -129,7 +129,7 @@ curl "http://localhost:8000/api/v1/cache/stats"
 #### Swapping LLM Providers
 ```python
 from app.services.factory import service_factory
-from app.examples.openai_llm import OpenAILLM
+from app.services.impl.openai_llm import OpenAILLM
 
 # Swap to OpenAI LLM
 openai_llm = OpenAILLM(api_key="your-api-key")

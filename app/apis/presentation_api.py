@@ -154,6 +154,12 @@ async def configure_presentation(
             presentation.font = config.font
         if config.colors is not None:
             presentation.colors = config.colors
+        if config.aspect_ratio is not None:
+            presentation.aspect_ratio = config.aspect_ratio
+        if config.custom_width is not None:
+            presentation.custom_width = config.custom_width
+        if config.custom_height is not None:
+            presentation.custom_height = config.custom_height
         
         # Update timestamp
         presentation.updated_at = datetime.now().isoformat()

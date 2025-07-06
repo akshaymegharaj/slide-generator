@@ -25,7 +25,7 @@ This document summarizes the changes made to centralize theme configurations thr
 - Replaced hardcoded font values with `ThemeConfig.get_theme_font()`
 
 ### 3. Updated API Layer
-**File: `app/presentation_api.py`**
+**File: `app/apis/presentation_api.py`**
 - Simplified theme configuration logic
 - Removed 40+ lines of hardcoded theme-specific code
 - Now uses `ThemeConfig.get_theme_font()` and `ThemeConfig.get_theme_colors()`

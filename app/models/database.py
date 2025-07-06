@@ -5,6 +5,7 @@ from sqlmodel import SQLModel, Field, JSON, Column
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
+from app.config.themes import Theme, ThemeConfig
 
 class SlideType(str, Enum):
     """Types of slides supported"""
@@ -12,13 +13,6 @@ class SlideType(str, Enum):
     BULLET_POINTS = "bullet_points"
     TWO_COLUMN = "two_column"
     CONTENT_WITH_IMAGE = "content_with_image"
-
-class Theme(str, Enum):
-    """Available themes"""
-    MODERN = "modern"
-    CLASSIC = "classic"
-    MINIMAL = "minimal"
-    CORPORATE = "corporate"
 
 class SlideDB(SQLModel, table=True):
     """Database model for individual slides"""
@@ -44,15 +38,10 @@ class PresentationDB(SQLModel, table=True):
     num_slides: int = Field(ge=1, le=20)
     custom_content: Optional[str] = Field(max_length=2000, default=None)
     theme: Theme = Field(default=Theme.MODERN)
-    font: str = Field(default="Arial")
+    font: str = Field(default=ThemeConfig.get_theme_font(Theme.MODERN))
     colors: Dict[str, str] = Field(
         sa_column=Column(JSON),
-        default_factory=lambda: {
-            "primary": "#2E86AB",
-            "secondary": "#A23B72",
-            "background": "#FFFFFF",
-            "text": "#000000"
-        }
+        default_factory=lambda: ThemeConfig.get_theme_colors(Theme.MODERN)
     )
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow) 

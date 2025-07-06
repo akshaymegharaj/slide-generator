@@ -9,7 +9,8 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 from app.models.database import PresentationDB, SlideDB, SlideType as DBSlideType, Theme as DBTheme
-from app.models.presentation import Presentation, Slide, PresentationCreate, PresentationConfig, SlideType, Theme
+from app.models.presentation import Presentation, Slide, PresentationCreate, PresentationConfig, SlideType
+from app.config.themes import Theme
 from app.interfaces.storage import StorageInterface
 from app.interfaces.cache import CacheInterface
 
@@ -83,8 +84,11 @@ class DatabaseStorage(StorageInterface):
             
             await session.commit()
             
-            # Update cache
-            self.cache.set_presentation(presentation.id, presentation.model_dump())
+            # Get the saved presentation with proper timestamps
+            saved_presentation = await self.get_presentation(session, presentation.id)
+            if saved_presentation:
+                # Update cache with the saved presentation (which has timestamps)
+                self.cache.set_presentation(presentation.id, saved_presentation.model_dump())
             
             return True
             

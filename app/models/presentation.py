@@ -4,6 +4,7 @@ Presentation models for the Slide Generator API
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from enum import Enum
+from app.config.themes import Theme, ThemeConfig
 
 class SlideType(str, Enum):
     """Types of slides supported"""
@@ -11,13 +12,6 @@ class SlideType(str, Enum):
     BULLET_POINTS = "bullet_points"
     TWO_COLUMN = "two_column"
     CONTENT_WITH_IMAGE = "content_with_image"
-
-class Theme(str, Enum):
-    """Available themes"""
-    MODERN = "modern"
-    CLASSIC = "classic"
-    MINIMAL = "minimal"
-    CORPORATE = "corporate"
 
 class Slide(BaseModel):
     """Individual slide model"""
@@ -36,14 +30,9 @@ class PresentationCreate(BaseModel):
 class PresentationConfig(BaseModel):
     """Model for presentation configuration"""
     theme: Optional[Theme] = Field(Theme.MODERN, description="Presentation theme")
-    font: Optional[str] = Field("Arial", description="Font family")
+    font: Optional[str] = Field(ThemeConfig.get_theme_font(Theme.MODERN), description="Font family")
     colors: Optional[Dict[str, str]] = Field(
-        default_factory=lambda: {
-            "primary": "#2E86AB",
-            "secondary": "#A23B72",
-            "background": "#FFFFFF",
-            "text": "#000000"
-        },
+        default_factory=lambda: ThemeConfig.get_theme_colors(Theme.MODERN),
         description="Color scheme"
     )
 
@@ -55,14 +44,9 @@ class Presentation(BaseModel):
     slides: List[Slide] = Field(default_factory=list)
     custom_content: Optional[str] = None
     theme: Theme = Theme.MODERN
-    font: str = "Arial"
+    font: str = ThemeConfig.get_theme_font(Theme.MODERN)
     colors: Dict[str, str] = Field(
-        default_factory=lambda: {
-            "primary": "#2E86AB",
-            "secondary": "#A23B72",
-            "background": "#FFFFFF",
-            "text": "#000000"
-        }
+        default_factory=lambda: ThemeConfig.get_theme_colors(Theme.MODERN)
     )
     created_at: Optional[str] = None
     updated_at: Optional[str] = None 

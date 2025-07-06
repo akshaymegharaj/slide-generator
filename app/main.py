@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from typing import Optional, List
 import uuid
 import os
+from datetime import datetime
+from app.settings import OPENAI_API_KEY
 
 # Import our modules
 from app.models.presentation import Presentation, PresentationCreate, PresentationConfig
@@ -15,6 +17,12 @@ from app.services.slide_generator import SlideGenerator
 from app.services.factory import service_factory
 from app.database import get_session, create_db_and_tables
 from sqlalchemy.ext.asyncio import AsyncSession
+
+# Import presentation endpoints from a new modular file
+from app.presentation_api import router as presentation_router
+
+# Import LLM implementations
+from app.examples.openai_llm import OpenAILLM
 
 app = FastAPI(
     title="Slide Generator API",
@@ -25,8 +33,24 @@ app = FastAPI(
 # Initialize services using factory
 cache_service = service_factory.get_cache_service()
 storage = service_factory.get_storage_service()
+
+
+def configure_llm_service():
+    """Configure LLM service based on settings file or environment variables"""
+    if OPENAI_API_KEY:
+        print("🔧 Using OpenAI LLM for content generation")
+        openai_llm = OpenAILLM(api_key=OPENAI_API_KEY)
+        service_factory.set_llm_service(openai_llm)
+    else:
+        print("🔧 Using Dummy LLM for content generation (set OPENAI_API_KEY to use OpenAI)")
+
+# Configure LLM service
+configure_llm_service()
 llm_service = service_factory.get_llm_service()
 slide_generator = SlideGenerator(cache_service, llm_service)
+
+# Include presentation router
+app.include_router(presentation_router, prefix="/api/v1/presentations")
 
 @app.on_event("startup")
 async def startup_event():
@@ -49,167 +73,42 @@ async def clear_cache():
     cache_service.clear_all()
     return {"message": "All caches cleared"}
 
-@app.post("/api/v1/presentations", response_model=Presentation)
-async def create_presentation(
-    presentation: PresentationCreate,
-    session: AsyncSession = Depends(get_session)
-):
-    """Create a new presentation"""
-    try:
-        # Generate unique ID
-        presentation_id = str(uuid.uuid4())
-        
-        # Generate slides
-        slides = await slide_generator.generate_slides(
-            topic=presentation.topic,
-            num_slides=presentation.num_slides,
-            custom_content=presentation.custom_content
-        )
-        
-        # Create presentation object
-        new_presentation = Presentation(
-            id=presentation_id,
-            topic=presentation.topic,
-            num_slides=presentation.num_slides,
-            slides=slides,
-            custom_content=presentation.custom_content
-        )
-        
-        # Save to database
-        success = await storage.save_presentation(session, new_presentation)
-        if not success:
-            raise HTTPException(status_code=500, detail="Failed to save presentation")
-        
-        return new_presentation
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create presentation: {str(e)}")
+@app.get("/api/v1/llm/status")
+async def get_llm_status():
+    """Get current LLM service status"""
+    current_llm = service_factory.get_llm_service()
+    return {
+        "llm_service": type(current_llm).__name__,
+        "is_openai": isinstance(current_llm, OpenAILLM),
+        "is_dummy": "DummyLLM" in type(current_llm).__name__
+    }
 
-@app.get("/api/v1/presentations", response_model=List[Presentation])
-async def list_presentations(
-    limit: int = 100,
-    offset: int = 0,
-    session: AsyncSession = Depends(get_session)
-):
-    """List all presentations"""
+@app.post("/api/v1/llm/switch")
+async def switch_llm_service(llm_type: str = "dummy", api_key: Optional[str] = None):
+    """Switch LLM service implementation"""
     try:
-        presentations = await storage.list_presentations(session, limit=limit, offset=offset)
-        return presentations
+        if llm_type.lower() == "openai":
+            if not api_key:
+                raise HTTPException(status_code=400, detail="API key required for OpenAI")
+            openai_llm = OpenAILLM(api_key=api_key)
+            service_factory.set_llm_service(openai_llm)
+            # Update the slide generator with new LLM service
+            slide_generator = SlideGenerator(cache_service, service_factory.get_llm_service())
+            return {"message": "Switched to OpenAI LLM", "llm_service": "OpenAILLM"}
+        
+        elif llm_type.lower() == "dummy":
+            from app.services.dummy_llm import DummyLLM
+            dummy_llm = DummyLLM()
+            service_factory.set_llm_service(dummy_llm)
+            # Update the slide generator with new LLM service
+            slide_generator = SlideGenerator(cache_service, service_factory.get_llm_service())
+            return {"message": "Switched to Dummy LLM", "llm_service": "DummyLLM"}
+        
+        else:
+            raise HTTPException(status_code=400, detail="Invalid LLM type. Use 'openai' or 'dummy'")
+    
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to list presentations: {str(e)}")
-
-@app.get("/api/v1/presentations/search/{topic}", response_model=List[Presentation])
-async def search_presentations(
-    topic: str,
-    session: AsyncSession = Depends(get_session)
-):
-    """Search presentations by topic"""
-    try:
-        presentations = await storage.search_presentations(session, topic)
-        return presentations
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to search presentations: {str(e)}")
-
-@app.get("/api/v1/presentations/{presentation_id}", response_model=Presentation)
-async def get_presentation(
-    presentation_id: str,
-    session: AsyncSession = Depends(get_session)
-):
-    """Retrieve presentation details"""
-    try:
-        presentation = await storage.get_presentation(session, presentation_id)
-        if not presentation:
-            raise HTTPException(status_code=404, detail="Presentation not found")
-        return presentation
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve presentation: {str(e)}")
-
-@app.delete("/api/v1/presentations/{presentation_id}")
-async def delete_presentation(
-    presentation_id: str,
-    session: AsyncSession = Depends(get_session)
-):
-    """Delete a presentation"""
-    try:
-        success = await storage.delete_presentation(session, presentation_id)
-        if not success:
-            raise HTTPException(status_code=404, detail="Presentation not found")
-        return {"message": "Presentation deleted successfully"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to delete presentation: {str(e)}")
-
-@app.get("/api/v1/presentations/{presentation_id}/download")
-async def download_presentation(
-    presentation_id: str,
-    session: AsyncSession = Depends(get_session)
-):
-    """Download presentation as PPTX"""
-    try:
-        presentation = await storage.get_presentation(session, presentation_id)
-        if not presentation:
-            raise HTTPException(status_code=404, detail="Presentation not found")
-        
-        # Generate PPTX file
-        file_path = await slide_generator.create_pptx(presentation)
-        
-        return FileResponse(
-            path=file_path,
-            filename=f"presentation_{presentation_id}.pptx",
-            media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation"
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to download presentation: {str(e)}")
-
-@app.post("/api/v1/presentations/{presentation_id}/configure", response_model=Presentation)
-async def configure_presentation(
-    presentation_id: str,
-    config: PresentationConfig,
-    session: AsyncSession = Depends(get_session)
-):
-    """Modify presentation configuration"""
-    try:
-        presentation = await storage.get_presentation(session, presentation_id)
-        if not presentation:
-            raise HTTPException(status_code=404, detail="Presentation not found")
-        
-        # Update configuration
-        if config.theme is not None:
-            presentation.theme = config.theme
-        if config.font is not None:
-            presentation.font = config.font
-        if config.colors is not None:
-            presentation.colors = config.colors
-        
-        # Regenerate slides with new configuration
-        slides = await slide_generator.generate_slides(
-            topic=presentation.topic,
-            num_slides=presentation.num_slides,
-            custom_content=presentation.custom_content,
-            theme=config.theme or presentation.theme,
-            font=config.font or presentation.font,
-            colors=config.colors or presentation.colors
-        )
-        
-        presentation.slides = slides
-        
-        # Save updated presentation
-        success = await storage.save_presentation(session, presentation)
-        if not success:
-            raise HTTPException(status_code=500, detail="Failed to save updated presentation")
-        
-        return presentation
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to configure presentation: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to switch LLM service: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

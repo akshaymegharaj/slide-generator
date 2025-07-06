@@ -11,7 +11,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'app'))
 from app.database import create_db_and_tables, AsyncSessionLocal
 from app.services.factory import service_factory
 from app.services.slide_generator import SlideGenerator
-from app.models.presentation import PresentationCreate, PresentationConfig, Theme
+from app.models.presentation import PresentationCreate, PresentationConfig
+from app.config.themes import Theme
 
 async def test_database_and_caching():
     """Test the database and caching functionality"""

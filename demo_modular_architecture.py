@@ -12,8 +12,8 @@ from app.services.factory import service_factory
 from app.services.slide_generator import SlideGenerator
 from app.database import create_db_and_tables, AsyncSessionLocal
 from app.models.presentation import PresentationCreate, Presentation
-from app.services.examples.openai_llm import OpenAILLM
-from app.services.examples.redis_cache import RedisCacheService
+from app.examples.openai_llm import OpenAILLM
+from app.examples.redis_cache import RedisCacheService
 
 async def demo_modular_architecture():
     """Demonstrate the modular architecture"""

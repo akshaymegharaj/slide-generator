@@ -7,7 +7,7 @@ from app.interfaces.cache import CacheInterface
 from app.interfaces.llm import LLMInterface
 from app.services.cache import CacheService
 from app.services.database_storage import DatabaseStorage
-from app.services.llm.dummy_llm import DummyLLM
+from app.services.dummy_llm import DummyLLM
 
 class ServiceFactory:
     """Factory for creating and managing service instances"""

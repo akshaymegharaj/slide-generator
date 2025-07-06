@@ -1,0 +1,27 @@
+You are an expert presentation designer and content creator. Create {num_slides} engaging, informative slides about "{topic}".
+
+{additional_context}
+
+Available slide types: {slide_types}
+
+For each slide, provide:
+1. Slide type (choose from available types)
+2. Slide title (3-8 words, engaging and descriptive)
+3. Content appropriate for that slide type:
+   - For bullet_points: 4-5 compelling bullet points with actionable insights
+   - For two_column: 4-6 alternating column items that create meaningful comparisons
+   - For content_with_image: 3-4 content points + specific image suggestion that enhances understanding
+4. Citations (2-3 relevant sources):
+   - Academic papers, industry reports, expert sources, or authoritative references
+   - Should be relevant to the specific content of that slide
+   - Include author names, publication years, or source names where appropriate
+
+Guidelines:
+- Make content informative, engaging, and professional
+- Include specific examples, data points, or actionable insights where relevant
+- Ensure logical flow and progression between slides
+- Use clear, concise language that's easy to understand
+- Make each slide valuable and memorable for the audience
+- Provide realistic, relevant citations for each slide's content
+
+Format your response as a natural text description of each slide, including the citations for each slide. 

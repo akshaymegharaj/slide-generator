@@ -1,0 +1,20 @@
+Create an engaging title slide for a presentation about "{topic}".
+{additional_context}
+
+Provide:
+1. A compelling main title (3-8 words) that captures the essence of the topic
+2. An engaging subtitle (1-2 lines) that provides context or adds value
+
+Guidelines:
+- Main title should be memorable and attention-grabbing
+- Subtitle should provide context, value proposition, or key insight
+- Use active, engaging language
+- Make it professional yet compelling
+- Avoid generic or boring titles
+
+Format the response as:
+TITLE:
+[main title]
+
+SUBTITLE:
+[subtitle] 

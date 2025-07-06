@@ -1,0 +1,13 @@
+Based on the following content about "{topic}", format it into a structured JSON response.
+
+Original content:
+{initial_content}
+
+Please format this into the exact JSON structure shown below. Use the slide_type values: "bullet_points", "two_column", "content_with_image".
+
+IMPORTANT: Extract and include the citations mentioned in the original content for each slide. If no citations are provided in the original content, generate 2-3 realistic, relevant citations for each slide based on the content.
+
+Sample output structure:
+{sample_output}
+
+Return ONLY the JSON object, no additional text or explanations. 

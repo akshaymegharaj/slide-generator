@@ -191,25 +191,25 @@ class SlideGenerator:
             # Dynamic font sizing based on content length and slide type
             if is_title:
                 # For titles, use larger font but scale down if text is long
-                base_size = 24
+                base_size = 28  # Increased from 24
                 if len(paragraph.text) > 50:
-                    base_size = 20
+                    base_size = 24  # Increased from 20
                 elif len(paragraph.text) > 100:
-                    base_size = 16
+                    base_size = 20  # Increased from 16
                 elif len(paragraph.text) > 150:
-                    base_size = 14
+                    base_size = 18  # Increased from 14
                 paragraph.font.size = Pt(base_size)
                 # Center align titles/headings
                 paragraph.alignment = PP_ALIGN.CENTER
             else:
-                # For content, use smaller font with better scaling
-                base_size = 14
+                # For content, use larger font with better scaling
+                base_size = 18  # Increased from 14
                 if len(paragraph.text) > 100:
-                    base_size = 12
+                    base_size = 16  # Increased from 12
                 elif len(paragraph.text) > 200:
-                    base_size = 10
+                    base_size = 14  # Increased from 10
                 elif len(paragraph.text) > 300:
-                    base_size = 8
+                    base_size = 12  # Increased from 8
                 paragraph.font.size = Pt(base_size)
                 # Left align content
                 paragraph.alignment = PP_ALIGN.LEFT
@@ -278,15 +278,24 @@ class SlideGenerator:
         # Position citations box at bottom with margins
         left = Inches(0.5)
         width = Inches(width_inches - 1.0)  # Full width minus margins
-        height = Inches(0.5)
-        top = Inches(height_inches - 0.8)  # Near bottom with margin
+        height = Inches(0.8)  # Increased height from 0.5 to 0.8 to prevent overflow
+        top = Inches(height_inches - 1.0)  # Adjusted position to accommodate larger height
         
         textbox = slide.shapes.add_textbox(left, top, width, height)
         text_frame = textbox.text_frame
         text_frame.clear()
+        
+        # Configure text frame for proper wrapping and overflow prevention
+        text_frame.word_wrap = True
+        text_frame.auto_size = False  # Disable auto-size to prevent overflow
+        text_frame.margin_left = Inches(0.1)
+        text_frame.margin_right = Inches(0.1)
+        text_frame.margin_top = Inches(0.05)
+        text_frame.margin_bottom = Inches(0.05)
+        
         p = text_frame.paragraphs[0]
         p.text = citations_text
-        # Style: small font, gray color
+        # Style: small font, gray color (no change in font size as requested)
         p.font.size = Pt(10)
         p.font.italic = True
         p.font.color.rgb = RGBColor(100, 100, 100)
@@ -320,7 +329,7 @@ class SlideGenerator:
         title_height = 1.5  # 1.5 inches height
         
         # Position subtitle below title with same left alignment
-        subtitle_top = title_top + title_height + 0.5  # 0.5 inch gap
+        subtitle_top = title_top + title_height + 0.8  # 0.8 inch gap (increased from 0.5)
         subtitle_height = 1.0  # 1 inch height
         
         # Create title text box
@@ -397,7 +406,7 @@ class SlideGenerator:
         title_height = 1.0  # 1 inch height
         
         # Position content below title
-        content_top = title_top + title_height + 0.3  # 0.3 inch gap
+        content_top = title_top + title_height + 0.6  # 0.6 inch gap (increased from 0.3)
         content_height = height_inches - content_top - 1.0  # Leave space for bottom
         
         # Create title text box with full width
@@ -445,6 +454,8 @@ class SlideGenerator:
             p.level = 0
             # Left align bullet points (content)
             p.alignment = PP_ALIGN.LEFT
+            # Add spacing between bullet points
+            p.space_after = Pt(8)  # 8 points spacing after each bullet point
         
         # Apply styling
         self._apply_font_and_colors(title_box, presentation, is_title=True)
@@ -478,7 +489,7 @@ class SlideGenerator:
         title_height = 1.0  # 1 inch height
         
         # Position columns below title
-        column_top = title_top + title_height + 0.3  # 0.3 inch gap
+        column_top = title_top + title_height + 0.6  # 0.6 inch gap (increased from 0.3)
         column_height = height_inches - column_top - 1.0  # Leave space for bottom
         
         # Create title text box with full width
@@ -561,7 +572,7 @@ class SlideGenerator:
             p.text = content
             # Left align and set proper spacing
             p.alignment = PP_ALIGN.LEFT
-            p.space_after = Pt(6)
+            p.space_after = Pt(10)  # Increased from 6 to 10 points for better spacing
         
         # Add content to right column
         for i, content in enumerate(right_content):
@@ -572,7 +583,7 @@ class SlideGenerator:
             p.text = content
             # Left align and set proper spacing
             p.alignment = PP_ALIGN.LEFT
-            p.space_after = Pt(6)
+            p.space_after = Pt(10)  # Increased from 6 to 10 points for better spacing
         
         # Apply styling with smaller font size for better fit
         self._apply_font_and_colors(title_box, presentation, is_title=True)
@@ -646,7 +657,7 @@ class SlideGenerator:
         title_height = 1.0  # 1 inch height
         
         # Position content below title
-        content_top = title_top + title_height + 0.3  # 0.3 inch gap
+        content_top = title_top + title_height + 0.6  # 0.6 inch gap (increased from 0.3)
         content_height = height_inches - content_top - 2.0  # Leave space for image and bottom
         
         # Create title text box with full width
@@ -693,6 +704,8 @@ class SlideGenerator:
             p.text = point
             # Left align content points
             p.alignment = PP_ALIGN.LEFT
+            # Add spacing between content points
+            p.space_after = Pt(8)  # 8 points spacing after each content point
         
         # Add image placeholder at bottom center
         if slide_data.image_suggestion:

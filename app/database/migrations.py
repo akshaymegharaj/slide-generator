@@ -3,7 +3,7 @@ Database migration script
 """
 import asyncio
 import os
-from app.database import create_db_and_tables, engine
+from .connection import create_db_and_tables, engine
 from app.models.database import SQLModel
 
 async def run_migrations():

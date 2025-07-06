@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy import text
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.models.database import PresentationDB, SlideDB, SlideType as DBSlideType, Theme as DBTheme
 from app.models.presentation import Presentation, Slide, PresentationCreate, PresentationConfig, SlideType
@@ -84,11 +84,11 @@ class DatabaseStorage(StorageInterface):
                 existing_presentation.aspect_ratio = aspect_ratio_value
                 existing_presentation.custom_width = presentation.custom_width
                 existing_presentation.custom_height = presentation.custom_height
-                existing_presentation.updated_at = datetime.utcnow()
+                existing_presentation.updated_at = datetime.now(UTC)
                 await session.flush()  # Ensure changes are flushed before slide operations
             else:
                 # Create new presentation
-                created_at = datetime.utcnow()
+                created_at = datetime.now(UTC)
                 if presentation.created_at:
                     try:
                         if isinstance(presentation.created_at, str):
@@ -96,7 +96,7 @@ class DatabaseStorage(StorageInterface):
                         else:
                             created_at = presentation.created_at
                     except:
-                        created_at = datetime.utcnow()
+                        created_at = datetime.now(UTC)
                 
                 presentation_db = PresentationDB(
                     id=presentation.id,
@@ -110,7 +110,7 @@ class DatabaseStorage(StorageInterface):
                     custom_width=presentation.custom_width,
                     custom_height=presentation.custom_height,
                     created_at=created_at,
-                    updated_at=datetime.utcnow()
+                    updated_at=datetime.now(UTC)
                 )
                 session.add(presentation_db)
                 await session.flush()

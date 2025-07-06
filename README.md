@@ -1,141 +1,83 @@
 # Slide Generator API
 
-A modern API for generating customizable presentation slides using AI. Built with FastAPI, SQLite, and modular architecture.
+Generate customizable presentation slides using AI. Built with FastAPI, SQLite, and a modular, swappable architecture.
 
 ## Features
-
-- 🤖 **AI-Powered Generation**: Create slides on any topic
-- 🎨 **Customizable Themes**: Multiple themes and styling options
-- 💾 **Persistent Storage**: SQLite database with async operations
-- ⚡ **Fast Caching**: In-memory caching for quick responses
-- 📊 **PPTX Export**: Download presentations as PowerPoint files
-- 🔧 **Modular Design**: Easy to swap implementations
-- 📚 **Auto Documentation**: Interactive API docs with Swagger
+- AI-powered slide generation
+- Customizable themes & aspect ratios
+- Persistent SQLite storage
+- Fast in-memory caching
+- PPTX export
+- Modular, pluggable design
+- Interactive API docs (Swagger)
 
 ## Quick Start
-
-### 1. Clone & Setup
 ```bash
 git clone <repository-url>
 cd slide-generator
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env  # Add your OpenAI API key
 ```
 
-### 2. Environment Setup
-```bash
-cp .env.example .env
-# Edit .env and add your OpenAI API key
-```
-
-### 3. Run the API
+## Run the API
 ```bash
 python -m app.main
+# or
+uvicorn app.main:app --reload
 ```
+Visit [localhost:8000/docs](http://localhost:8000/docs) for interactive API docs.
 
-Visit `http://localhost:8000/docs` for interactive API documentation.
+## Documentation
+📚 **Detailed documentation** is available in the [`docs/`](docs/) folder:
+- [API Documentation](docs/API_DOCUMENTATION.md) - Complete API reference
+- [Architecture Guide](docs/ARCHITECTURE.md) - System design and patterns
+- [Environment Setup](docs/ENVIRONMENT_SETUP.md) - Configuration details
+- [Middleware Guide](docs/MIDDLEWARE_GUIDE.md) - Auth, rate limiting, etc.
+- [Setup Instructions](docs/SETUP_INSTRUCTIONS.md) - Step-by-step guide
 
-## API Endpoints
+## Key API Endpoints
+- `POST /api/v1/presentations` – Create presentation
+- `GET /api/v1/presentations/{id}` – Get presentation
+- `GET /api/v1/presentations` – List presentations
+- `GET /api/v1/presentations/{id}/download` – Download PPTX
+- `POST /api/v1/presentations/{id}/configure` – Update config
 
-### Presentations
-- `POST /api/v1/presentations` - Create presentation
-- `GET /api/v1/presentations/{id}` - Get presentation
-- `GET /api/v1/presentations` - List presentations
-- `DELETE /api/v1/presentations/{id}` - Delete presentation
-- `GET /api/v1/presentations/{id}/download` - Download PPTX
-- `POST /api/v1/presentations/{id}/configure` - Update configuration
-
-### System
-- `GET /` - Health check
-- `GET /api/v1/cache/stats` - Cache statistics
-- `POST /api/v1/cache/clear` - Clear cache
-- `GET /api/v1/llm/status` - LLM service status
-
-## Example Usage
-
-### Create a Presentation
+## Example: Create a Presentation
 ```bash
 curl -X POST "http://localhost:8000/api/v1/presentations" \
   -H "Content-Type: application/json" \
-  -d '{
-    "topic": "Machine Learning Basics",
-    "num_slides": 5,
-    "custom_content": "Focus on practical applications"
-  }'
+  -d '{"topic": "Machine Learning Basics", "num_slides": 5}'
 ```
 
-### Configure Presentation
-```bash
-curl -X POST "http://localhost:8000/api/v1/presentations/{id}/configure" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "theme": "modern",
-    "aspect_ratio": "16:9",
-    "colors": {
-      "primary": "#2E86AB",
-      "secondary": "#A23B72"
-    }
-  }'
-```
+## Modular Architecture
+- **Interfaces**: Abstract contracts for LLM, cache, storage
+- **Implementations**: Pluggable (OpenAI, dummy LLM, Redis, etc.)
+- **Factory pattern**: Easy to swap components
 
-## Architecture
-
-### Modular Design
-- **Interfaces**: Abstract contracts for all services
-- **Implementations**: Pluggable service implementations
-- **Factory Pattern**: Easy service swapping
-- **Dependency Injection**: Clean separation of concerns
-
-### Services
-- **Storage**: SQLite database with async operations
-- **Cache**: In-memory caching with TTL
-- **LLM**: OpenAI integration (with dummy fallback)
-- **Generator**: Slide generation and PPTX creation
-
-### Database Schema
-- **Presentations**: Metadata, theme, configuration
-- **Slides**: Content, type, order, citations
-
-## Configuration
-
-### Environment Variables
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `OPENAI_API_KEY` | OpenAI API key | Required |
-| `DATABASE_URL` | Database connection | `sqlite:///./slide_generator.db` |
-| `API_HOST` | Server host | `0.0.0.0` |
-| `API_PORT` | Server port | `8000` |
-
-See [Environment Setup Guide](docs/ENVIRONMENT_SETUP.md) for detailed configuration.
-
-## Development
-
-### Project Structure
+## Project Structure
 ```
 app/
-├── apis/           # API routes
-├── config/         # Configuration
-├── interfaces/     # Abstract interfaces
-├── middleware/     # Rate limiting, auth
-├── models/         # Data models
-├── services/       # Business logic
-│   └── impl/      # Service implementations
-└── main.py        # Application entry
+  apis/         # API routes
+  config/       # Config & themes
+  interfaces/   # Abstract interfaces
+  middleware/   # Auth, rate limiting
+  models/       # Data models
+  services/     # Logic & implementations
+  main.py       # Entry point
 ```
 
-### Testing
+## Configuration
+- `.env` for secrets and API keys
+- See `docs/ENVIRONMENT_SETUP.md` for details
+
+## Testing
 ```bash
 pytest tests/ -v
 ```
 
-### Adding New Services
-1. Implement the interface in `app/interfaces/`
-2. Create implementation in `app/services/impl/`
-3. Register in `app/services/factory.py`
-
 ## License
-
-MIT License - see LICENSE file for details.
+MIT
 
 

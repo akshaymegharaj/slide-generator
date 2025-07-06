@@ -2,6 +2,7 @@
 Slide Generator API - Main Application
 """
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from app.settings import OPENAI_API_KEY
 
 # Import services
@@ -19,11 +20,13 @@ from app.middleware import rate_limiter, auth_middleware, concurrency_controller
 from app.apis.system import router as system_router
 from app.apis.presentation_api import router as presentation_router
 
-app = FastAPI(
-    title="Slide Generator API",
-    description="Generate customizable presentation slides on any topic",
-    version="1.0.0"
-)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown events"""
+    # Startup
+    await create_db_and_tables()
+    yield
+    # Shutdown (if needed in the future)
 
 # Initialize services using factory
 cache_service = service_factory.get_cache_service()
@@ -43,6 +46,13 @@ configure_llm_service()
 llm_service = service_factory.get_llm_service()
 slide_generator = SlideGenerator(cache_service, llm_service)
 
+app = FastAPI(
+    title="Slide Generator API",
+    description="Generate customizable presentation slides on any topic",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
 # Add middleware to the application
 app.middleware("http")(rate_limiter)
 app.middleware("http")(auth_middleware)
@@ -51,11 +61,6 @@ app.middleware("http")(concurrency_controller)
 # Include API routers
 app.include_router(system_router)
 app.include_router(presentation_router, prefix="/api/v1/presentations")
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize database on startup"""
-    await create_db_and_tables()
 
 if __name__ == "__main__":
     import uvicorn

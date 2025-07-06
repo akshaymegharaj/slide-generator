@@ -1,12 +1,10 @@
-# Python
+# Python bytecode and build artifacts
 __pycache__/
 *.py[cod]
 *.so
-*.egg
 *.egg-info/
 dist/
 build/
-*.egg-info/
 
 # Virtual environments
 venv/
@@ -14,23 +12,20 @@ env/
 ENV/
 
 # Environment and secrets
-.env
-.env.local
-.env.production
+.env*
 app/settings.py
 
-# IDE
+# IDE/editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Database
+# Databases
 *.db
-*.sqlite
-*.sqlite3
+*.sqlite*
 
-# Generated files
+# Output and generated files
 *.pptx
 output/
 temp/
@@ -40,6 +35,6 @@ storage/
 *.log
 logs/
 
-# OS
+# OS-specific
 .DS_Store
 Thumbs.db

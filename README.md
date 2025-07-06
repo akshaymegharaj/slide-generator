@@ -1,132 +1,226 @@
-# Backend Engineer Take-Home Assignment: Slide Generator API
+# Slide Generator API
 
-## Objective
-Create a backend application that generates customizable presentation slides on any topic using Python.
+A modern, scalable API for generating customizable presentation slides on any topic. Built with FastAPI, SQLModel, and in-memory caching.
 
-## Setup Instructions
+## Features
 
-### Prerequisites
-- Python 3.8 or higher
-- pip (Python package installer)
+- **AI-Powered Slide Generation**: Generate presentation slides on any topic
+- **Persistent Storage**: SQLite database with SQLModel for reliable data persistence
+- **In-Memory Caching**: Fast response times with intelligent caching
+- **Customizable Themes**: Multiple presentation themes and styling options
+- **PPTX Export**: Download presentations as PowerPoint files
+- **RESTful API**: Clean, documented API endpoints
+- **Async Support**: Full async/await support for high performance
 
-### Installation
+## Architecture
 
-1. **Clone the repository** (if not already done):
-```bash
-git clone <repository-url>
-cd slide-generator
-```
+### Database Layer
+- **SQLModel**: Modern Python library that combines SQLAlchemy and Pydantic
+- **SQLite**: Lightweight, serverless database for easy deployment
+- **Async Support**: Full async database operations for better performance
+
+### Caching Layer
+- **In-Memory Caching**: Fast access to frequently requested data
+- **TTL (Time-To-Live)**: Automatic cache expiration to prevent stale data
+- **Multiple Cache Types**:
+  - Presentation cache (1 hour TTL)
+  - Slide generation cache (30 minutes TTL)
+  - API response cache (15 minutes TTL)
+
+### API Layer
+- **FastAPI**: Modern, fast web framework for building APIs
+- **Automatic Documentation**: Interactive API docs with Swagger UI
+- **Type Safety**: Full type hints and validation
+- **Dependency Injection**: Clean separation of concerns
+
+## Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd slide-generator
+   ```
 
 2. **Create a virtual environment**:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
 3. **Install dependencies**:
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-4. **Run the application**:
+4. **Set up the database**:
+   ```bash
+   python -m app.migrations
+   ```
+
+## Usage
+
+### Starting the Server
+
 ```bash
 python -m app.main
 ```
 
 The API will be available at `http://localhost:8000`
 
-### Development
+### API Documentation
 
-- **Run tests**:
+Visit `http://localhost:8000/docs` for interactive API documentation.
+
+### Key Endpoints
+
+#### Presentations
+- `POST /api/v1/presentations` - Create a new presentation
+- `GET /api/v1/presentations/{id}` - Get presentation details
+- `GET /api/v1/presentations` - List all presentations
+- `GET /api/v1/presentations/search/{topic}` - Search presentations by topic
+- `DELETE /api/v1/presentations/{id}` - Delete a presentation
+- `GET /api/v1/presentations/{id}/download` - Download as PPTX
+- `POST /api/v1/presentations/{id}/configure` - Update presentation configuration
+
+#### Cache Management
+- `GET /api/v1/cache/stats` - Get cache statistics
+- `POST /api/v1/cache/clear` - Clear all caches
+
+### Example Usage
+
+#### Create a Presentation
+```bash
+curl -X POST "http://localhost:8000/api/v1/presentations" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "topic": "Machine Learning Basics",
+       "num_slides": 5,
+       "custom_content": "Focus on practical applications"
+     }'
+```
+
+#### Get Cache Statistics
+```bash
+curl "http://localhost:8000/api/v1/cache/stats"
+```
+
+## Database Schema
+
+### Presentations Table
+- `id` (String, Primary Key): Unique presentation identifier
+- `topic` (String): Presentation topic
+- `num_slides` (Integer): Number of slides
+- `custom_content` (String, Optional): Custom content instructions
+- `theme` (Enum): Presentation theme
+- `font` (String): Font family
+- `colors` (JSON): Color scheme
+- `created_at` (DateTime): Creation timestamp
+- `updated_at` (DateTime): Last update timestamp
+
+### Slides Table
+- `id` (Integer, Primary Key): Unique slide identifier
+- `presentation_id` (String, Foreign Key): Reference to presentation
+- `slide_type` (Enum): Type of slide
+- `title` (String): Slide title
+- `content` (JSON): Slide content as list
+- `image_suggestion` (String, Optional): Suggested image
+- `citations` (JSON): List of citations
+- `slide_order` (Integer): Slide order in presentation
+- `created_at` (DateTime): Creation timestamp
+- `updated_at` (DateTime): Last update timestamp
+
+## Caching Strategy
+
+### Cache Types and TTLs
+1. **Presentation Cache** (1 hour TTL, max 100 items)
+   - Caches complete presentation objects
+   - Reduces database queries for frequently accessed presentations
+
+2. **Slide Generation Cache** (30 minutes TTL, max 200 items)
+   - Caches slide generation results
+   - Prevents regenerating identical slides
+
+3. **API Response Cache** (15 minutes TTL, max 500 items)
+   - Caches API endpoint responses
+   - Improves response times for repeated requests
+
+### Cache Keys
+- **Presentation Cache**: Uses presentation ID
+- **Slide Generation Cache**: Uses hash of generation parameters
+- **API Response Cache**: Uses hash of endpoint and parameters
+
+## Development
+
+### Running Tests
 ```bash
 pytest tests/
 ```
 
-- **API Documentation**: Visit `http://localhost:8000/docs` for interactive API documentation
+### Database Migrations
+```bash
+# Run migrations
+python -m app.migrations
 
-## Requirements
-### Core Features
-- Content Generation API
-- Accept topic/subject as input.
-- Generate relevant content using LLMs (Large Language Models).
-- Support custom content input.
-- Include image suggestions (optional).
+# Reset database
+python -m app.migrations reset
+```
 
-### Slide Configuration
-- Number of slides (min 1, max 20).
-- Support for 4 slide layouts:
-- Title slide
-- Bullet points (3-5 points)
-- Two-column layout
-- Content with image placeholder
-- Apply a consistent theme/styling.
-- Support custom fonts and colors.
+### Code Structure
+```
+app/
+├── __init__.py
+├── main.py              # FastAPI application
+├── database.py          # Database configuration
+├── migrations.py        # Database migrations
+├── models/
+│   ├── __init__.py
+│   ├── presentation.py  # Pydantic models
+│   └── database.py      # SQLModel database models
+└── services/
+    ├── __init__.py
+    ├── cache.py         # Caching service
+    ├── database_storage.py  # Database storage service
+    └── slide_generator.py   # Slide generation service
+```
 
-### Citation & References
-- Include source citations in the slides.
+## Performance Considerations
 
-### Export Functionality
-- Generate PowerPoint (.pptx) files.
+### Caching Benefits
+- **Reduced Database Load**: Frequently accessed data served from memory
+- **Faster Response Times**: Cache hits return data immediately
+- **Scalability**: Reduces resource usage under high load
 
-&nbsp;
+### Database Optimization
+- **Indexed Queries**: Foreign keys and frequently searched fields are indexed
+- **Async Operations**: Non-blocking database operations
+- **Connection Pooling**: Efficient database connection management
 
-# Technical Requirements
-## P0 Deliverable
+### Memory Management
+- **TTL Expiration**: Automatic cache cleanup prevents memory bloat
+- **Size Limits**: Maximum cache sizes prevent unlimited memory growth
+- **LRU Eviction**: Least recently used items evicted when limits reached
 
-Implement the following RESTful endpoints:
+## Deployment
 
-API Endpoints
+### Environment Variables
+- `DATABASE_URL`: SQLite database URL (default: `sqlite+aiosqlite:///./slide_generator.db`)
 
-POST   /api/v1/presentations      # Create a new presentation
+### Production Considerations
+- **Database**: Consider using PostgreSQL for production
+- **Caching**: Use Redis for distributed caching
+- **Security**: Implement authentication and rate limiting
+- **Monitoring**: Add logging and metrics collection
 
-GET    /api/v1/presentations/{id}  # Retrieve presentation details
+## Contributing
 
-GET    /api/v1/presentations/{id}/download # Download presentation as PPTX
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
 
-POST   /api/v1/presentations/{id}/configure # Modify presentation configuration 
+## License
 
-Slide Generation
-
-Use python-pptx or an equivalent library.
-
-
-### Stretch Deliverables:
-API Enhancements:
-- Request/response validation.
-- Error handling.
-- Rate limiting.
-- Authentication (optional).
-
-Templating and Advanced Features:
-- Implement a templating system.
-- Support concurrent requests.
-- Handle different aspect ratios.
-
-Stretch Goal: Performance
-- Optimize content generation.
-- Implement caching.
-- Handle multiple simultaneous requests efficiently.
-
-Deliverables
-- Source code with documentation.
-- API documentation
-- Setup instructions.
-- 3 Sample presentations (.pptx files).
-
-Evaluation Criteria
-- Code quality and organization.
-- Performance optimization.
-- Documentation (clarity, completeness, ease of use).
-
-Time Allocation
-- 4-6 hours
-
-Submission
-Provide a private GitHub repository link containing:
-
-- Source code.
-- README.md (including project description, setup instructions, API documentation).
-- requirements.txt (listing all dependencies).
-- Sample output presentations (in the pptx format) in a designated folder.
+This project is licensed under the MIT License.
 
 

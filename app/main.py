@@ -17,7 +17,6 @@ from app.middleware import rate_limiter, auth_middleware, concurrency_controller
 
 # Import API routes
 from app.apis.system import router as system_router
-from app.apis.config import router as config_router
 from app.apis.presentation_api import router as presentation_router
 
 app = FastAPI(
@@ -51,7 +50,6 @@ app.middleware("http")(concurrency_controller)
 
 # Include API routers
 app.include_router(system_router)
-app.include_router(config_router)
 app.include_router(presentation_router, prefix="/api/v1/presentations")
 
 @app.on_event("startup")

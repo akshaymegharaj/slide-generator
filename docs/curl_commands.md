@@ -49,13 +49,6 @@ curl -X POST "http://localhost:8000/api/v1/llm/switch" \
 curl -X GET "http://localhost:8000/api/v1/concurrency/stats"
 ```
 
-## Aspect Ratios
-
-### Get Available Aspect Ratios
-```bash
-curl -X GET "http://localhost:8000/api/v1/aspect-ratios"
-```
-
 ## Presentations
 
 ### Create a New Presentation
@@ -102,7 +95,7 @@ curl -X GET "http://localhost:8000/api/v1/presentations/{presentation_id}/downlo
   --output "presentation.pptx"
 ```
 
-### Configure Presentation
+### Configure Presentation (including aspect ratio and custom dimensions)
 ```bash
 # Replace {presentation_id} with actual UUID
 curl -X POST "http://localhost:8000/api/v1/presentations/{presentation_id}/configure" \
@@ -135,12 +128,7 @@ curl -X POST "http://localhost:8000/api/v1/presentations/{presentation_id}/confi
    curl -X GET "http://localhost:8000/api/v1/llm/status"
    ```
 
-3. **Get available aspect ratios:**
-   ```bash
-   curl -X GET "http://localhost:8000/api/v1/aspect-ratios"
-   ```
-
-4. **Create a presentation:**
+3. **Create a presentation:**
    ```bash
    curl -X POST "http://localhost:8000/api/v1/presentations" \
      -H "Content-Type: application/json" \
@@ -151,17 +139,17 @@ curl -X POST "http://localhost:8000/api/v1/presentations/{presentation_id}/confi
      }'
    ```
 
-5. **List presentations to get the ID:**
+4. **List presentations to get the ID:**
    ```bash
    curl -X GET "http://localhost:8000/api/v1/presentations"
    ```
 
-6. **Get specific presentation (replace UUID):**
+5. **Get specific presentation (replace UUID):**
    ```bash
    curl -X GET "http://localhost:8000/api/v1/presentations/ec8b6f43-723c-46c7-809a-43befe3b7ea9"
    ```
 
-7. **Configure the presentation (replace UUID):**
+6. **Configure the presentation (replace UUID, including aspect ratio):**
    ```bash
    curl -X POST "http://localhost:8000/api/v1/presentations/ec8b6f43-723c-46c7-809a-43befe3b7ea9/configure" \
      -H "Content-Type: application/json" \
@@ -175,11 +163,13 @@ curl -X POST "http://localhost:8000/api/v1/presentations/{presentation_id}/confi
          "text": "#2C3E50",
          "accent": "#3498DB"
        },
-       "aspect_ratio": "16:9"
+       "aspect_ratio": "16:9",
+       "custom_width": 13.33,
+       "custom_height": 7.5
      }'
    ```
 
-8. **Download the presentation (replace UUID):**
+7. **Download the presentation (replace UUID):**
    ```bash
    curl -X GET "http://localhost:8000/api/v1/presentations/ec8b6f43-723c-46c7-809a-43befe3b7ea9/download" \
      --output "python_web_dev_presentation.pptx"

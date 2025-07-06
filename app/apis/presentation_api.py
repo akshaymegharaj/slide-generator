@@ -136,7 +136,10 @@ async def configure_presentation(
     config: PresentationConfig,
     session: AsyncSession = Depends(get_session)
 ):
-    """Modify presentation configuration without regenerating content"""
+    """
+    Modify presentation configuration without regenerating content.
+    You can update theme, font, colors, aspect_ratio, custom_width, and custom_height here.
+    """
     try:
         presentation = await storage.get_presentation(session, presentation_id)
         if not presentation:

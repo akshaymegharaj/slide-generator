@@ -3,6 +3,47 @@
 ## Objective
 Create a backend application that generates customizable presentation slides on any topic using Python.
 
+## Setup Instructions
+
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package installer)
+
+### Installation
+
+1. **Clone the repository** (if not already done):
+```bash
+git clone <repository-url>
+cd slide-generator
+```
+
+2. **Create a virtual environment**:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. **Install dependencies**:
+```bash
+pip install -r requirements.txt
+```
+
+4. **Run the application**:
+```bash
+python -m app.main
+```
+
+The API will be available at `http://localhost:8000`
+
+### Development
+
+- **Run tests**:
+```bash
+pytest tests/
+```
+
+- **API Documentation**: Visit `http://localhost:8000/docs` for interactive API documentation
+
 ## Requirements
 ### Core Features
 - Content Generation API

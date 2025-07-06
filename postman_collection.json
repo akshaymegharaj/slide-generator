@@ -1,0 +1,189 @@
+{
+  "info": {
+    "name": "Slide Generator API",
+    "description": "Complete API collection for the Slide Generator application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": [""]
+        },
+        "description": "Health check endpoint to verify API is running"
+      }
+    },
+    {
+      "name": "Get Cache Stats",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/cache/stats",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "cache", "stats"]
+        },
+        "description": "Get cache statistics"
+      }
+    },
+    {
+      "name": "Clear Cache",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/cache/clear",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "cache", "clear"]
+        },
+        "description": "Clear all caches"
+      }
+    },
+    {
+      "name": "Create Presentation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"topic\": \"Introduction to Machine Learning\",\n  \"num_slides\": 5,\n  \"custom_content\": \"Focus on practical applications and real-world examples\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations"]
+        },
+        "description": "Create a new presentation with specified topic and number of slides"
+      }
+    },
+    {
+      "name": "List Presentations",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations?limit=100&offset=0",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "100",
+              "description": "Maximum number of presentations to return"
+            },
+            {
+              "key": "offset",
+              "value": "0",
+              "description": "Number of presentations to skip"
+            }
+          ]
+        },
+        "description": "List all presentations with optional pagination"
+      }
+    },
+    {
+      "name": "Search Presentations",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations/search/Machine",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations", "search", "Machine"]
+        },
+        "description": "Search presentations by topic keyword"
+      }
+    },
+    {
+      "name": "Get Presentation",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations/{presentation_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations", "{presentation_id}"]
+        },
+        "description": "Get details of a specific presentation by ID"
+      }
+    },
+    {
+      "name": "Delete Presentation",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations/{presentation_id}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations", "{presentation_id}"]
+        },
+        "description": "Delete a specific presentation by ID"
+      }
+    },
+    {
+      "name": "Download Presentation",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations/{presentation_id}/download",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations", "{presentation_id}", "download"]
+        },
+        "description": "Download presentation as PPTX file"
+      }
+    },
+    {
+      "name": "Configure Presentation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"theme\": \"corporate\",\n  \"font\": \"Calibri\",\n  \"colors\": {\n    \"primary\": \"#1f4e79\",\n    \"secondary\": \"#d32f2f\",\n    \"background\": \"#ffffff\",\n    \"text\": \"#333333\"\n  }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/v1/presentations/{presentation_id}/configure",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["api", "v1", "presentations", "{presentation_id}", "configure"]
+        },
+        "description": "Update presentation configuration (theme, font, colors)"
+      }
+    }
+  ]
+} 

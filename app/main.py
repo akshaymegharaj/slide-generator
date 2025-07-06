@@ -85,22 +85,6 @@ async def create_presentation(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create presentation: {str(e)}")
 
-@app.get("/api/v1/presentations/{presentation_id}", response_model=Presentation)
-async def get_presentation(
-    presentation_id: str,
-    session: AsyncSession = Depends(get_session)
-):
-    """Retrieve presentation details"""
-    try:
-        presentation = await storage.get_presentation(session, presentation_id)
-        if not presentation:
-            raise HTTPException(status_code=404, detail="Presentation not found")
-        return presentation
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve presentation: {str(e)}")
-
 @app.get("/api/v1/presentations", response_model=List[Presentation])
 async def list_presentations(
     limit: int = 100,
@@ -125,6 +109,22 @@ async def search_presentations(
         return presentations
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to search presentations: {str(e)}")
+
+@app.get("/api/v1/presentations/{presentation_id}", response_model=Presentation)
+async def get_presentation(
+    presentation_id: str,
+    session: AsyncSession = Depends(get_session)
+):
+    """Retrieve presentation details"""
+    try:
+        presentation = await storage.get_presentation(session, presentation_id)
+        if not presentation:
+            raise HTTPException(status_code=404, detail="Presentation not found")
+        return presentation
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve presentation: {str(e)}")
 
 @app.delete("/api/v1/presentations/{presentation_id}")
 async def delete_presentation(

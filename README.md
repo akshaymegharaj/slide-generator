@@ -72,7 +72,13 @@ The application is built with a **modular architecture** that allows seamless sw
    pip install -r requirements.txt
    ```
 
-4. **Set up the database**:
+4. **Set up environment variables**:
+   ```bash
+   cp .env.example .env
+   # Edit .env file and add your OpenAI API key
+   ```
+
+5. **Set up the database**:
    ```bash
    python -m app.migrations
    ```

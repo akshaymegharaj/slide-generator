@@ -5,6 +5,7 @@ This shows how easy it is to swap LLM providers
 import asyncio
 import json
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 import openai
 from app.interfaces.llm import LLMInterface
 from app.models.presentation import Slide, SlideType
@@ -57,26 +58,39 @@ class OpenAILLM(LLMInterface):
         type_names = [t.value for t in available_types]
         
         prompt = f"""
-        Create {num_slides} slides about "{topic}".
-        {f'Custom content to include: {custom_content}' if custom_content else ''}
+        You are an expert presentation designer and content creator. Create {num_slides} engaging, informative slides about "{topic}".
+        
+        {f'Additional context to incorporate: {custom_content}' if custom_content else ''}
         
         Available slide types: {', '.join(type_names)}
         
         For each slide, provide:
         1. Slide type (choose from available types)
-        2. Slide title (3-8 words)
+        2. Slide title (3-8 words, engaging and descriptive)
         3. Content appropriate for that slide type:
-           - For bullet_points: 4-5 bullet points
-           - For two_column: 4-6 alternating column items
-           - For content_with_image: 3-4 content points + image suggestion
+           - For bullet_points: 4-5 compelling bullet points with actionable insights
+           - For two_column: 4-6 alternating column items that create meaningful comparisons
+           - For content_with_image: 3-4 content points + specific image suggestion that enhances understanding
+        4. Citations (2-3 relevant sources):
+           - Academic papers, industry reports, expert sources, or authoritative references
+           - Should be relevant to the specific content of that slide
+           - Include author names, publication years, or source names where appropriate
         
-        Format your response as a natural text description of each slide.
+        Guidelines:
+        - Make content informative, engaging, and professional
+        - Include specific examples, data points, or actionable insights where relevant
+        - Ensure logical flow and progression between slides
+        - Use clear, concise language that's easy to understand
+        - Make each slide valuable and memorable for the audience
+        - Provide realistic, relevant citations for each slide's content
+        
+        Format your response as a natural text description of each slide, including the citations for each slide.
         """
         
         response = await self.client.chat.completions.create(
             model=self.model,
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=1000,
+            max_tokens=1500,
             temperature=0.7
         )
         content = response.choices[0].message.content
@@ -139,6 +153,8 @@ class OpenAILLM(LLMInterface):
         
         Please format this into the exact JSON structure shown below. Use the slide_type values: "bullet_points", "two_column", "content_with_image".
         
+        IMPORTANT: Extract and include the citations mentioned in the original content for each slide. If no citations are provided in the original content, generate 2-3 realistic, relevant citations for each slide based on the content.
+        
         Sample output structure:
         {json.dumps(sample_output, indent=2)}
         
@@ -193,9 +209,17 @@ class OpenAILLM(LLMInterface):
     async def generate_slide_title(self, topic: str, slide_number: int, slide_type: SlideType) -> str:
         """Generate a title for a specific slide using OpenAI"""
         prompt = f"""
-        Generate a concise and engaging title for slide {slide_number} about "{topic}".
+        Generate a compelling and engaging title for slide {slide_number} about "{topic}".
         Slide type: {slide_type.value}
-        The title should be 3-8 words and capture the main point of the slide.
+        
+        Guidelines:
+        - Title should be 3-8 words
+        - Capture the main point and value proposition of the slide
+        - Be memorable and attention-grabbing
+        - Use active, engaging language
+        - Avoid generic or boring titles
+        
+        The title should make the audience want to learn more about what's on the slide.
         """
         
         response = await self.client.chat.completions.create(
@@ -207,16 +231,67 @@ class OpenAILLM(LLMInterface):
         content = response.choices[0].message.content
         return content.strip().strip('"') if content else ""
     
+    async def generate_title_slide_content(self, topic: str, custom_content: Optional[str] = None) -> tuple[str, str]:
+        """Generate title and subtitle for the title slide using OpenAI"""
+        prompt = f"""
+        Create an engaging title slide for a presentation about "{topic}".
+        {f'Additional context to incorporate: {custom_content}' if custom_content else ''}
+        
+        Provide:
+        1. A compelling main title (3-8 words) that captures the essence of the topic
+        2. An engaging subtitle (1-2 lines) that provides context or adds value
+        
+        Guidelines:
+        - Main title should be memorable and attention-grabbing
+        - Subtitle should provide context, value proposition, or key insight
+        - Use active, engaging language
+        - Make it professional yet compelling
+        - Avoid generic or boring titles
+        
+        Format the response as:
+        TITLE:
+        [main title]
+        
+        SUBTITLE:
+        [subtitle]
+        """
+        
+        response = await self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=100,
+            temperature=0.7
+        )
+        
+        content = response.choices[0].message.content
+        if not isinstance(content, str):
+            return topic, f"Generated on {datetime.now().strftime('%B %d, %Y')}"
+        
+        # Parse the response
+        parts = content.split('SUBTITLE:')
+        title_part = parts[0].replace('TITLE:', '').strip()
+        subtitle_part = parts[1].strip() if len(parts) > 1 else f"Generated on {datetime.now().strftime('%B %d, %Y')}"
+        
+        return title_part, subtitle_part
+    
     async def generate_bullet_points(self, topic: str, slide_title: str, custom_content: Optional[str] = None) -> List[str]:
         """Generate bullet points for a slide using OpenAI"""
         prompt = f"""
-        Generate 4-5 bullet points for a slide titled "{slide_title}" about "{topic}".
-        {f'Custom content to include: {custom_content}' if custom_content else ''}
+        Generate 4-5 compelling bullet points for a slide titled "{slide_title}" about "{topic}".
+        {f'Additional context to incorporate: {custom_content}' if custom_content else ''}
         
         Each bullet point should be:
-        - Concise (1-2 lines)
-        - Informative and relevant
-        - Professional in tone
+        - Concise but impactful (1-2 lines)
+        - Informative with specific insights or actionable information
+        - Professional yet engaging in tone
+        - Include concrete examples, data points, or practical takeaways where relevant
+        - Build upon each other to create a coherent narrative
+        
+        Guidelines:
+        - Start with the most important point
+        - Use active voice and strong verbs
+        - Include specific details rather than generic statements
+        - Make each point memorable and valuable to the audience
         
         Return only the bullet points, one per line, without numbering or formatting.
         """
@@ -236,12 +311,19 @@ class OpenAILLM(LLMInterface):
     async def generate_two_column_content(self, topic: str, slide_title: str, custom_content: Optional[str] = None) -> List[str]:
         """Generate content for a two-column slide using OpenAI"""
         prompt = f"""
-        Generate content for a two-column slide titled "{slide_title}" about "{topic}".
-        {f'Custom content to include: {custom_content}' if custom_content else ''}
+        Generate compelling content for a two-column slide titled "{slide_title}" about "{topic}".
+        {f'Additional context to incorporate: {custom_content}' if custom_content else ''}
         
-        Create 4-6 alternating items for the two columns:
-        - Column 1: Features, facts, or concepts
-        - Column 2: Benefits, explanations, or results
+        Create 4-6 alternating items for the two columns that create meaningful comparisons:
+        - Column 1: Features, facts, concepts, challenges, or current state
+        - Column 2: Benefits, explanations, solutions, or future state
+        
+        Guidelines:
+        - Make comparisons meaningful and insightful
+        - Use specific examples and concrete details
+        - Ensure logical pairing between columns
+        - Include actionable insights or practical takeaways
+        - Make the comparison valuable for the audience
         
         Format as: "Column 1: [content]" and "Column 2: [content]"
         """
@@ -261,19 +343,30 @@ class OpenAILLM(LLMInterface):
     async def generate_content_with_image(self, topic: str, slide_title: str, custom_content: Optional[str] = None) -> tuple[List[str], str]:
         """Generate content and image suggestion for a slide with image using OpenAI"""
         prompt = f"""
-        Generate content for a slide titled "{slide_title}" about "{topic}" that will include an image.
-        {f'Custom content to include: {custom_content}' if custom_content else ''}
+        Generate compelling content for a slide titled "{slide_title}" about "{topic}" that will include an image.
+        {f'Additional context to incorporate: {custom_content}' if custom_content else ''}
         
         Provide:
-        1. 3-4 content points (1-2 lines each)
-        2. An image suggestion that would complement the content
+        1. 3-4 content points (1-2 lines each) that are informative and engaging
+        2. A specific image suggestion that would enhance understanding and complement the content
+        
+        Guidelines for content:
+        - Make each point valuable and memorable
+        - Include specific examples or insights where relevant
+        - Use clear, concise language
+        - Ensure points work together to tell a coherent story
+        
+        Guidelines for image:
+        - Suggest specific, relevant images (e.g., "Infographic showing data flow", "Diagram of system architecture")
+        - Images should enhance understanding, not just decorate
+        - Be specific about what the image should show
         
         Format the response as:
         CONTENT:
         [content points, one per line]
         
         IMAGE:
-        [image suggestion]
+        [specific image suggestion]
         """
         
         response = await self.client.chat.completions.create(
@@ -302,14 +395,23 @@ class OpenAILLM(LLMInterface):
         else:
             content_str = str(content)
         prompt = f"""
-        Generate 2-3 realistic citations for content about "{topic}".
-        The citations should be:
-        - Academic papers, industry reports, or expert sources
-        - Relevant to the topic
-        - Properly formatted
+        Generate 2-3 realistic, relevant citations for the following content about "{topic}".
         
-        Content:
+        Content to cite:
         {content_str}
+        
+        The citations should be:
+        - Academic papers, industry reports, expert sources, or authoritative references
+        - Specifically relevant to the content provided
+        - Include author names, publication years, or source names where appropriate
+        - Realistic and credible for the topic
+        - Properly formatted as complete citations
+        
+        Guidelines:
+        - Make citations specific to the actual content points
+        - Include recent sources (within last 5-10 years) when appropriate
+        - Use credible sources that would actually exist for this topic
+        - Format as complete citations (e.g., "Smith, J. (2023). Title of Paper. Journal Name.")
         
         Return only the citations, one per line.
         """

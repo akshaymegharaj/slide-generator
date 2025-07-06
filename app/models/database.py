@@ -21,7 +21,7 @@ class SlideDB(SQLModel, table=True):
     
     id: Optional[int] = Field(default=None, primary_key=True)
     presentation_id: str = Field(foreign_key="presentations.id")
-    slide_type: SlideType
+    slide_type: str
     title: str
     content: List[str] = Field(sa_column=Column(JSON))
     image_suggestion: Optional[str] = None
@@ -38,13 +38,13 @@ class PresentationDB(SQLModel, table=True):
     topic: str = Field(max_length=200)
     num_slides: int = Field(ge=1, le=20)
     custom_content: Optional[str] = Field(max_length=2000, default=None)
-    theme: Theme = Field(default=Theme.MODERN)
+    theme: str = Field(default=Theme.MODERN.value)
     font: str = Field(default=ThemeConfig.get_theme_font(Theme.MODERN))
     colors: Dict[str, str] = Field(
         sa_column=Column(JSON),
         default_factory=lambda: ThemeConfig.get_theme_colors(Theme.MODERN)
     )
-    aspect_ratio: AspectRatio = Field(default=AspectRatio.WIDESCREEN_16_9)
+    aspect_ratio: str = Field(default=AspectRatio.WIDESCREEN_16_9.value)
     custom_width: Optional[float] = Field(default=None, ge=5.0, le=20.0)
     custom_height: Optional[float] = Field(default=None, ge=5.0, le=20.0)
     created_at: datetime = Field(default_factory=datetime.utcnow)

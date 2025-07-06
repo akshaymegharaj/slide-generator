@@ -11,8 +11,51 @@ from datetime import datetime
 from app.models.database import PresentationDB, SlideDB, SlideType as DBSlideType, Theme as DBTheme
 from app.models.presentation import Presentation, Slide, PresentationCreate, PresentationConfig, SlideType
 from app.config.themes import Theme
+from app.config.aspect_ratios import AspectRatio
 from app.interfaces.storage import StorageInterface
 from app.interfaces.cache import CacheInterface
+
+# Helper to get enum value or string
+def get_enum_value(val):
+    return val.value if hasattr(val, 'value') else val
+
+def safe_enum_conversion(enum_class, value):
+    """Safely convert string values to enum, handling legacy data"""
+    if isinstance(value, enum_class):
+        return value
+    
+    if not value:
+        # Return first enum value as default
+        return list(enum_class)[0]
+    
+    # Handle legacy enum names that might be stored in the database
+    legacy_mappings = {
+        # AspectRatio legacy mappings
+        'WIDESCREEN_16_9': '16:9',
+        'STANDARD_4_3': '4:3',
+        'CUSTOM': 'custom',
+        # SlideType legacy mappings  
+        'TITLE': 'title',
+        'CONTENT': 'content',
+        'IMAGE': 'image',
+        'QUOTE': 'quote',
+        'CHART': 'chart',
+        'COMPARISON': 'comparison',
+        'TIMELINE': 'timeline',
+        'PROCESS': 'process',
+        'SUMMARY': 'summary'
+    }
+    
+    # Check if it's a legacy enum name
+    if value in legacy_mappings:
+        value = legacy_mappings[value]
+    
+    try:
+        return enum_class(value)
+    except ValueError:
+        print(f"Warning: Invalid {enum_class.__name__} value '{value}', using default")
+        # Return first enum value as default
+        return list(enum_class)[0]
 
 class DatabaseStorage(StorageInterface):
     """Database-based storage service with caching"""
@@ -28,14 +71,19 @@ class DatabaseStorage(StorageInterface):
             existing_result = await session.execute(existing_statement)
             existing_presentation = existing_result.scalar_one_or_none()
             
+            aspect_ratio_value = get_enum_value(presentation.aspect_ratio)
+            
             if existing_presentation:
                 # Update existing presentation
                 existing_presentation.topic = presentation.topic
                 existing_presentation.num_slides = presentation.num_slides
                 existing_presentation.custom_content = presentation.custom_content
-                existing_presentation.theme = DBTheme(presentation.theme.value)
+                existing_presentation.theme = get_enum_value(presentation.theme)
                 existing_presentation.font = presentation.font
                 existing_presentation.colors = presentation.colors
+                existing_presentation.aspect_ratio = aspect_ratio_value
+                existing_presentation.custom_width = presentation.custom_width
+                existing_presentation.custom_height = presentation.custom_height
                 existing_presentation.updated_at = datetime.utcnow()
                 await session.flush()  # Ensure changes are flushed before slide operations
             else:
@@ -55,9 +103,12 @@ class DatabaseStorage(StorageInterface):
                     topic=presentation.topic,
                     num_slides=presentation.num_slides,
                     custom_content=presentation.custom_content,
-                    theme=DBTheme(presentation.theme.value),
+                    theme=get_enum_value(presentation.theme),
                     font=presentation.font,
                     colors=presentation.colors,
+                    aspect_ratio=aspect_ratio_value,
+                    custom_width=presentation.custom_width,
+                    custom_height=presentation.custom_height,
                     created_at=created_at,
                     updated_at=datetime.utcnow()
                 )
@@ -73,7 +124,7 @@ class DatabaseStorage(StorageInterface):
             for i, slide in enumerate(presentation.slides):
                 slide_db = SlideDB(
                     presentation_id=presentation.id,
-                    slide_type=DBSlideType(slide.slide_type.value),
+                    slide_type=get_enum_value(slide.slide_type),
                     title=slide.title,
                     content=slide.content,
                     image_suggestion=slide.image_suggestion,
@@ -121,10 +172,10 @@ class DatabaseStorage(StorageInterface):
             slides_result = await session.execute(slides_statement)
             slides_db = slides_result.scalars().all()
             
-            # Convert to domain models
+            # Convert to domain models with safe enum conversion
             slides = [
                 Slide(
-                    slide_type=slide.slide_type,
+                    slide_type=safe_enum_conversion(SlideType, slide.slide_type),
                     title=slide.title,
                     content=slide.content,
                     image_suggestion=slide.image_suggestion,
@@ -133,16 +184,20 @@ class DatabaseStorage(StorageInterface):
                 for slide in slides_db
             ]
             
+            # Handle aspect ratio conversion safely
+            aspect_ratio = safe_enum_conversion(AspectRatio, presentation_db.aspect_ratio)
+            
+            theme = safe_enum_conversion(Theme, presentation_db.theme)
             presentation = Presentation(
                 id=presentation_db.id,
                 topic=presentation_db.topic,
                 num_slides=presentation_db.num_slides,
                 slides=slides,
                 custom_content=presentation_db.custom_content,
-                theme=presentation_db.theme,
+                theme=theme,
                 font=presentation_db.font,
                 colors=presentation_db.colors,
-                aspect_ratio=presentation_db.aspect_ratio,
+                aspect_ratio=aspect_ratio,
                 custom_width=presentation_db.custom_width,
                 custom_height=presentation_db.custom_height,
                 created_at=presentation_db.created_at.isoformat() if presentation_db.created_at else None,
@@ -194,14 +249,14 @@ class DatabaseStorage(StorageInterface):
                 # Get slides for each presentation
                 slides_statement = select(SlideDB).where(
                     SlideDB.presentation_id == presentation_db.id
-                ).order_by(SlideDB.slide_order)
+                ).order_by(SlideDB.slide_order.asc())
                 
                 slides_result = await session.execute(slides_statement)
                 slides_db = slides_result.scalars().all()
                 
                 slides = [
                     Slide(
-                        slide_type=slide.slide_type,
+                        slide_type=SlideType(slide.slide_type) if not isinstance(slide.slide_type, SlideType) else slide.slide_type,
                         title=slide.title,
                         content=slide.content,
                         image_suggestion=slide.image_suggestion,
@@ -210,16 +265,27 @@ class DatabaseStorage(StorageInterface):
                     for slide in slides_db
                 ]
                 
+                # Handle aspect ratio conversion safely
+                try:
+                    if presentation_db.aspect_ratio:
+                        aspect_ratio = AspectRatio(presentation_db.aspect_ratio)
+                    else:
+                        aspect_ratio = AspectRatio.WIDESCREEN_16_9
+                except ValueError:
+                    print(f"Warning: Invalid aspect ratio '{presentation_db.aspect_ratio}', defaulting to WIDESCREEN_16_9")
+                    aspect_ratio = AspectRatio.WIDESCREEN_16_9
+                
+                theme = Theme(presentation_db.theme) if not isinstance(presentation_db.theme, Theme) else presentation_db.theme
                 presentation = Presentation(
                     id=presentation_db.id,
                     topic=presentation_db.topic,
                     num_slides=presentation_db.num_slides,
                     slides=slides,
                     custom_content=presentation_db.custom_content,
-                    theme=presentation_db.theme,
+                    theme=theme,
                     font=presentation_db.font,
                     colors=presentation_db.colors,
-                    aspect_ratio=presentation_db.aspect_ratio,
+                    aspect_ratio=aspect_ratio,
                     custom_width=presentation_db.custom_width,
                     custom_height=presentation_db.custom_height,
                     created_at=presentation_db.created_at.isoformat() if presentation_db.created_at else None,
@@ -247,14 +313,14 @@ class DatabaseStorage(StorageInterface):
                 # Get slides for each presentation
                 slides_statement = select(SlideDB).where(
                     SlideDB.presentation_id == presentation_db.id
-                ).order_by(SlideDB.slide_order)
+                ).order_by(SlideDB.slide_order.asc())
                 
                 slides_result = await session.execute(slides_statement)
                 slides_db = slides_result.scalars().all()
                 
                 slides = [
                     Slide(
-                        slide_type=slide.slide_type,
+                        slide_type=SlideType(slide.slide_type) if not isinstance(slide.slide_type, SlideType) else slide.slide_type,
                         title=slide.title,
                         content=slide.content,
                         image_suggestion=slide.image_suggestion,
@@ -263,16 +329,27 @@ class DatabaseStorage(StorageInterface):
                     for slide in slides_db
                 ]
                 
+                # Handle aspect ratio conversion safely
+                try:
+                    if presentation_db.aspect_ratio:
+                        aspect_ratio = AspectRatio(presentation_db.aspect_ratio)
+                    else:
+                        aspect_ratio = AspectRatio.WIDESCREEN_16_9
+                except ValueError:
+                    print(f"Warning: Invalid aspect ratio '{presentation_db.aspect_ratio}', defaulting to WIDESCREEN_16_9")
+                    aspect_ratio = AspectRatio.WIDESCREEN_16_9
+                
+                theme = Theme(presentation_db.theme) if not isinstance(presentation_db.theme, Theme) else presentation_db.theme
                 presentation = Presentation(
                     id=presentation_db.id,
                     topic=presentation_db.topic,
                     num_slides=presentation_db.num_slides,
                     slides=slides,
                     custom_content=presentation_db.custom_content,
-                    theme=presentation_db.theme,
+                    theme=theme,
                     font=presentation_db.font,
                     colors=presentation_db.colors,
-                    aspect_ratio=presentation_db.aspect_ratio,
+                    aspect_ratio=aspect_ratio,
                     custom_width=presentation_db.custom_width,
                     custom_height=presentation_db.custom_height,
                     created_at=presentation_db.created_at.isoformat() if presentation_db.created_at else None,

@@ -17,4 +17,13 @@ class LLMInterface(ABC):
         slide_types: Optional[List[SlideType]] = None
     ) -> List[Slide]:
         """Generate slide content using LLM"""
+        pass
+    
+    @abstractmethod
+    async def generate_title_slide_content(
+        self, 
+        topic: str, 
+        custom_content: Optional[str] = None
+    ) -> tuple[str, str]:
+        """Generate title and subtitle for the title slide using LLM"""
         pass 

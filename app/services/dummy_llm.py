@@ -3,6 +3,7 @@ Dummy LLM implementation for testing and development
 """
 import asyncio
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 from app.interfaces.llm import LLMInterface
 from app.models.presentation import Slide, SlideType
 
@@ -40,6 +41,18 @@ class DummyLLM(LLMInterface):
             slides.append(slide)
         
         return slides
+    
+    async def generate_title_slide_content(self, topic: str, custom_content: Optional[str] = None) -> tuple[str, str]:
+        """Generate title and subtitle for the title slide"""
+        await asyncio.sleep(self.delay_simulation)
+        
+        title = f"{topic}"
+        subtitle = f"Generated on {datetime.now().strftime('%B %d, %Y')}"
+        
+        if custom_content:
+            subtitle = f"{custom_content[:50]}... | {subtitle}"
+        
+        return title, subtitle
     
     async def generate_slide_title(self, topic: str, slide_number: int, slide_type: SlideType) -> str:
         """Generate a title for a specific slide"""

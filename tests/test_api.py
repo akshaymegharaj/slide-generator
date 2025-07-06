@@ -8,6 +8,9 @@ from app.main import app
 
 client = TestClient(app)
 
+# Add default headers for authentication
+client.headers = {"X-API-Key": "test-api-key"}
+
 # 1. Health check
 
 def test_health_check():

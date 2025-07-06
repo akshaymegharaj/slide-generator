@@ -53,6 +53,13 @@ async def create_presentation(
     session: AsyncSession = Depends(get_session)
 ):
     """Create a new presentation"""
+    # Validate number of slides
+    if presentation.num_slides < 1 or presentation.num_slides > 20:
+        raise HTTPException(
+            status_code=400, 
+            detail="Number of slides must be between 1 and 20"
+        )
+    
     try:
         presentation_id = str(uuid.uuid4())
         slide_generator = get_slide_generator()

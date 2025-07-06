@@ -1,0 +1,68 @@
+{
+  "id": "18d18d0a-e77d-4cbc-8f11-03f962139a6d",
+  "topic": "Machine Learning Fundamentals",
+  "num_slides": 4,
+  "slides": [
+    {
+      "slide_type": "title",
+      "title": "Machine Learning Fundamentals",
+      "content": [
+        "Generated on July 06, 2025"
+      ],
+      "image_suggestion": null,
+      "citations": []
+    },
+    {
+      "slide_type": "bullet_points",
+      "title": "Key Point 1",
+      "content": [
+        "Important aspect 1 of Machine Learning Fundamentals",
+        "Supporting detail for point 1",
+        "Additional information about Machine Learning Fundamentals",
+        "Conclusion for section 1"
+      ],
+      "image_suggestion": null,
+      "citations": [
+        "Source 1"
+      ]
+    },
+    {
+      "slide_type": "two_column",
+      "title": "Comparison 2",
+      "content": [
+        "Column 1: Feature 2",
+        "Column 2: Benefit 2",
+        "Column 1: Advantage 2",
+        "Column 2: Result 2"
+      ],
+      "image_suggestion": null,
+      "citations": [
+        "Reference 2"
+      ]
+    },
+    {
+      "slide_type": "content_with_image",
+      "title": "Visual 3",
+      "content": [
+        "Main content about Machine Learning Fundamentals",
+        "Supporting text for visual 3",
+        "Additional context and details"
+      ],
+      "image_suggestion": "Image related to Machine Learning Fundamentals - section 3",
+      "citations": [
+        "Visual source 3"
+      ]
+    }
+  ],
+  "custom_content": "Focus on supervised learning, neural networks, and practical applications",
+  "theme": "corporate",
+  "font": "Calibri",
+  "colors": {
+    "primary": "#1f4e79",
+    "secondary": "#4472c4",
+    "background": "#ffffff",
+    "text": "#2f2f2f"
+  },
+  "created_at": "2025-07-06T16:31:32.576380",
+  "updated_at": "2025-07-06T16:31:32.579513"
+}

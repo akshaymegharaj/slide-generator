@@ -12,14 +12,16 @@ from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 
 from app.models.presentation import Presentation, Slide, SlideType, Theme
-from app.services.cache import CacheService
+from app.interfaces.cache import CacheInterface
+from app.interfaces.llm import LLMInterface
 
 class SlideGenerator:
     """Service for generating slides and creating PPTX files"""
     
-    def __init__(self, cache_service: CacheService):
+    def __init__(self, cache_service: CacheInterface, llm_service: LLMInterface):
         self.output_dir = "output"
         self.cache = cache_service
+        self.llm = llm_service
         os.makedirs(self.output_dir, exist_ok=True)
     
     async def generate_slides(
@@ -83,56 +85,14 @@ class SlideGenerator:
         custom_content: Optional[str] = None
     ) -> List[Slide]:
         """
-        Generate content slides using LLM (placeholder implementation)
+        Generate content slides using LLM service
         """
-        slides = []
-        
-        # For now, we'll create placeholder content
-        # In a real implementation, this would call an LLM API
-        
-        slide_types = [SlideType.BULLET_POINTS, SlideType.TWO_COLUMN, SlideType.CONTENT_WITH_IMAGE]
-        
-        for i in range(num_slides):
-            slide_type = slide_types[i % len(slide_types)]
-            
-            if slide_type == SlideType.BULLET_POINTS:
-                slide = Slide(
-                    slide_type=slide_type,
-                    title=f"Key Point {i+1}",
-                    content=[
-                        f"Important aspect {i+1} of {topic}",
-                        f"Supporting detail for point {i+1}",
-                        f"Additional information about {topic}",
-                        f"Conclusion for section {i+1}"
-                    ],
-                    citations=[f"Source {i+1}"]
-                )
-            elif slide_type == SlideType.TWO_COLUMN:
-                slide = Slide(
-                    slide_type=slide_type,
-                    title=f"Comparison {i+1}",
-                    content=[
-                        f"Column 1: Feature {i+1}",
-                        f"Column 2: Benefit {i+1}",
-                        f"Column 1: Advantage {i+1}",
-                        f"Column 2: Result {i+1}"
-                    ],
-                    citations=[f"Reference {i+1}"]
-                )
-            else:  # CONTENT_WITH_IMAGE
-                slide = Slide(
-                    slide_type=slide_type,
-                    title=f"Visual {i+1}",
-                    content=[
-                        f"Main content about {topic}",
-                        f"Supporting text for visual {i+1}",
-                        f"Additional context and details"
-                    ],
-                    image_suggestion=f"Image related to {topic} - section {i+1}",
-                    citations=[f"Visual source {i+1}"]
-                )
-            
-            slides.append(slide)
+        # Use the LLM service to generate slide content
+        slides = await self.llm.generate_slides_content(
+            topic=topic,
+            num_slides=num_slides,
+            custom_content=custom_content
+        )
         
         return slides
     

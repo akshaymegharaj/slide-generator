@@ -1,0 +1,55 @@
+{
+  "id": "d2e4fd79-a9e5-4cb6-87df-3a67589eebca",
+  "topic": "Test Topic",
+  "num_slides": 3,
+  "slides": [
+    {
+      "slide_type": "title",
+      "title": "Test Topic",
+      "content": [
+        "Generated on July 06, 2025"
+      ],
+      "image_suggestion": null,
+      "citations": []
+    },
+    {
+      "slide_type": "bullet_points",
+      "title": "Key Point 1",
+      "content": [
+        "Important aspect 1 of Test Topic",
+        "Supporting detail for point 1",
+        "Additional information about Test Topic",
+        "Conclusion for section 1"
+      ],
+      "image_suggestion": null,
+      "citations": [
+        "Source 1"
+      ]
+    },
+    {
+      "slide_type": "two_column",
+      "title": "Comparison 2",
+      "content": [
+        "Column 1: Feature 2",
+        "Column 2: Benefit 2",
+        "Column 1: Advantage 2",
+        "Column 2: Result 2"
+      ],
+      "image_suggestion": null,
+      "citations": [
+        "Reference 2"
+      ]
+    }
+  ],
+  "custom_content": "Test custom content",
+  "theme": "modern",
+  "font": "Arial",
+  "colors": {
+    "primary": "#2E86AB",
+    "secondary": "#A23B72",
+    "background": "#FFFFFF",
+    "text": "#000000"
+  },
+  "created_at": "2025-07-06T16:30:29.062064",
+  "updated_at": "2025-07-06T16:30:29.062076"
+}

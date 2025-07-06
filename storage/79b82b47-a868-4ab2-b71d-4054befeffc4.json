@@ -1,0 +1,41 @@
+{
+  "id": "79b82b47-a868-4ab2-b71d-4054befeffc4",
+  "topic": "Get Test Topic",
+  "num_slides": 2,
+  "slides": [
+    {
+      "slide_type": "title",
+      "title": "Get Test Topic",
+      "content": [
+        "Generated on July 06, 2025"
+      ],
+      "image_suggestion": null,
+      "citations": []
+    },
+    {
+      "slide_type": "bullet_points",
+      "title": "Key Point 1",
+      "content": [
+        "Important aspect 1 of Get Test Topic",
+        "Supporting detail for point 1",
+        "Additional information about Get Test Topic",
+        "Conclusion for section 1"
+      ],
+      "image_suggestion": null,
+      "citations": [
+        "Source 1"
+      ]
+    }
+  ],
+  "custom_content": null,
+  "theme": "modern",
+  "font": "Arial",
+  "colors": {
+    "primary": "#2E86AB",
+    "secondary": "#A23B72",
+    "background": "#FFFFFF",
+    "text": "#000000"
+  },
+  "created_at": "2025-07-06T16:30:29.063768",
+  "updated_at": "2025-07-06T16:30:29.063777"
+}

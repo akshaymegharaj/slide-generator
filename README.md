@@ -14,10 +14,24 @@ A modern, scalable API for generating customizable presentation slides on any to
 
 ## Architecture
 
+### Modular Design
+The application is built with a **modular architecture** that allows seamless swapping of implementations:
+
+- **Interface-Based Design**: All services implement abstract interfaces
+- **Dependency Injection**: Services are injected through a factory pattern
+- **Loose Coupling**: Components can be replaced without changing the main application
+- **Easy Testing**: Mock implementations can be easily swapped in
+
+### Service Interfaces
+- **StorageInterface**: Abstract storage operations (SQLite, PostgreSQL, etc.)
+- **CacheInterface**: Abstract caching operations (In-Memory, Redis, etc.)
+- **LLMInterface**: Abstract LLM operations (Dummy, OpenAI, Anthropic, etc.)
+
 ### Database Layer
 - **SQLModel**: Modern Python library that combines SQLAlchemy and Pydantic
 - **SQLite**: Lightweight, serverless database for easy deployment
 - **Async Support**: Full async database operations for better performance
+- **Swappable**: Can easily switch to PostgreSQL, MySQL, etc.
 
 ### Caching Layer
 - **In-Memory Caching**: Fast access to frequently requested data
@@ -26,6 +40,12 @@ A modern, scalable API for generating customizable presentation slides on any to
   - Presentation cache (1 hour TTL)
   - Slide generation cache (30 minutes TTL)
   - API response cache (15 minutes TTL)
+- **Swappable**: Can easily switch to Redis, Memcached, etc.
+
+### LLM Layer
+- **Dummy LLM**: Placeholder implementation for development/testing
+- **OpenAI Integration**: Ready-to-use OpenAI implementation
+- **Swappable**: Can easily switch to Anthropic, Google, etc.
 
 ### API Layer
 - **FastAPI**: Modern, fast web framework for building APIs
@@ -104,6 +124,53 @@ curl -X POST "http://localhost:8000/api/v1/presentations" \
 curl "http://localhost:8000/api/v1/cache/stats"
 ```
 
+### Modular Architecture Examples
+
+#### Swapping LLM Providers
+```python
+from app.services.factory import service_factory
+from app.services.examples.openai_llm import OpenAILLM
+
+# Swap to OpenAI LLM
+openai_llm = OpenAILLM(api_key="your-api-key")
+service_factory.set_llm_service(openai_llm)
+
+# The application now uses OpenAI for content generation
+```
+
+#### Swapping Cache Backends
+```python
+from app.services.examples.redis_cache import RedisCacheService
+
+# Swap to Redis cache
+redis_cache = RedisCacheService(redis_url="redis://localhost:6379")
+service_factory.set_cache_service(redis_cache)
+
+# The application now uses Redis for caching
+```
+
+#### Creating Custom Implementations
+```python
+from app.interfaces.cache import CacheInterface
+
+class CustomCache(CacheInterface):
+    def __init__(self):
+        self.data = {}
+    
+    def get_presentation(self, presentation_id: str):
+        return self.data.get(f"presentation:{presentation_id}")
+    
+    # Implement other required methods...
+    
+# Use custom cache
+service_factory.set_cache_service(CustomCache())
+```
+
+#### Running the Modular Demo
+```bash
+python demo_modular_architecture.py
+```
+
 ## Database Schema
 
 ### Presentations Table
@@ -172,15 +239,26 @@ app/
 ├── main.py              # FastAPI application
 ├── database.py          # Database configuration
 ├── migrations.py        # Database migrations
+├── interfaces/          # Abstract service interfaces
+│   ├── __init__.py
+│   ├── storage.py       # Storage interface
+│   ├── cache.py         # Cache interface
+│   └── llm.py           # LLM interface
 ├── models/
 │   ├── __init__.py
 │   ├── presentation.py  # Pydantic models
 │   └── database.py      # SQLModel database models
-└── services/
-    ├── __init__.py
-    ├── cache.py         # Caching service
-    ├── database_storage.py  # Database storage service
-    └── slide_generator.py   # Slide generation service
+├── services/
+│   ├── __init__.py
+│   ├── factory.py       # Service factory for DI
+│   ├── cache.py         # In-memory cache implementation
+│   ├── database_storage.py  # SQLite storage implementation
+│   ├── slide_generator.py   # Slide generation service
+│   ├── llm/
+│   │   └── dummy_llm.py     # Dummy LLM implementation
+│   └── examples/        # Example implementations
+│       ├── redis_cache.py   # Redis cache example
+│       └── openai_llm.py    # OpenAI LLM example
 ```
 
 ## Performance Considerations

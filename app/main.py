@@ -12,8 +12,7 @@ import os
 from app.models.presentation import Presentation, PresentationCreate, PresentationConfig
 from app.models.database import PresentationDB, SlideDB
 from app.services.slide_generator import SlideGenerator
-from app.services.database_storage import DatabaseStorage
-from app.services.cache import CacheService
+from app.services.factory import service_factory
 from app.database import get_session, create_db_and_tables
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,10 +22,11 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Initialize services
-cache_service = CacheService()
-slide_generator = SlideGenerator(cache_service)
-storage = DatabaseStorage(cache_service)
+# Initialize services using factory
+cache_service = service_factory.get_cache_service()
+storage = service_factory.get_storage_service()
+llm_service = service_factory.get_llm_service()
+slide_generator = SlideGenerator(cache_service, llm_service)
 
 @app.on_event("startup")
 async def startup_event():

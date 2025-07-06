@@ -10,12 +10,13 @@ from datetime import datetime
 
 from app.models.database import PresentationDB, SlideDB
 from app.models.presentation import Presentation, Slide, PresentationCreate, PresentationConfig
-from app.services.cache import CacheService
+from app.interfaces.storage import StorageInterface
+from app.interfaces.cache import CacheInterface
 
-class DatabaseStorage:
+class DatabaseStorage(StorageInterface):
     """Database-based storage service with caching"""
     
-    def __init__(self, cache_service: CacheService):
+    def __init__(self, cache_service: CacheInterface):
         self.cache = cache_service
     
     async def save_presentation(self, session: AsyncSession, presentation: Presentation) -> bool:

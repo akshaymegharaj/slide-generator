@@ -6,7 +6,9 @@ from typing import Optional, Any, Dict
 import hashlib
 import json
 
-class CacheService:
+from app.interfaces.cache import CacheInterface
+
+class CacheService(CacheInterface):
     """Service for in-memory caching"""
     
     def __init__(self):

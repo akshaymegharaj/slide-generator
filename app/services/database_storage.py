@@ -117,7 +117,7 @@ class DatabaseStorage(StorageInterface):
             
             # Delete existing slides for this presentation
             await session.execute(
-                delete(SlideDB).where(SlideDB.presentation_id == presentation.id)
+                delete(SlideDB).where(SlideDB.__table__.c.presentation_id == str(presentation.id))
             )
             
             # Add slides
@@ -167,7 +167,7 @@ class DatabaseStorage(StorageInterface):
             # Get slides for this presentation
             slides_statement = select(SlideDB).where(
                 SlideDB.presentation_id == presentation_id
-            ).order_by(SlideDB.slide_order.asc())
+            ).order_by(SlideDB.__table__.c.slide_order.asc())
             
             slides_result = await session.execute(slides_statement)
             slides_db = slides_result.scalars().all()
@@ -184,20 +184,19 @@ class DatabaseStorage(StorageInterface):
                 for slide in slides_db
             ]
             
-            # Handle aspect ratio conversion safely
-            aspect_ratio = safe_enum_conversion(AspectRatio, presentation_db.aspect_ratio)
-            
-            theme = safe_enum_conversion(Theme, presentation_db.theme)
+            # Handle aspect ratio and theme conversion safely
+            aspect_ratio_value = safe_enum_conversion(AspectRatio, presentation_db.aspect_ratio)
+            theme_value = safe_enum_conversion(Theme, presentation_db.theme)
             presentation = Presentation(
                 id=presentation_db.id,
                 topic=presentation_db.topic,
                 num_slides=presentation_db.num_slides,
                 slides=slides,
                 custom_content=presentation_db.custom_content,
-                theme=theme,
+                theme=theme_value,  # type: ignore
                 font=presentation_db.font,
                 colors=presentation_db.colors,
-                aspect_ratio=aspect_ratio,
+                aspect_ratio=aspect_ratio_value,
                 custom_width=presentation_db.custom_width,
                 custom_height=presentation_db.custom_height,
                 created_at=presentation_db.created_at.isoformat() if presentation_db.created_at else None,
@@ -221,12 +220,11 @@ class DatabaseStorage(StorageInterface):
             
             # Delete slides first (due to foreign key constraint)
             await session.execute(
-                delete(SlideDB).where(SlideDB.presentation_id == presentation_id)
+                delete(SlideDB).where(SlideDB.__table__.c.presentation_id == str(presentation_id))
             )
-            
             # Delete presentation
             await session.execute(
-                delete(PresentationDB).where(PresentationDB.id == presentation_id)
+                delete(PresentationDB).where(PresentationDB.__table__.c.id == str(presentation_id))
             )
             
             await session.commit()
@@ -249,7 +247,7 @@ class DatabaseStorage(StorageInterface):
                 # Get slides for each presentation
                 slides_statement = select(SlideDB).where(
                     SlideDB.presentation_id == presentation_db.id
-                ).order_by(SlideDB.slide_order.asc())
+                ).order_by(SlideDB.__table__.c.slide_order.asc())
                 
                 slides_result = await session.execute(slides_statement)
                 slides_db = slides_result.scalars().all()
@@ -313,7 +311,7 @@ class DatabaseStorage(StorageInterface):
                 # Get slides for each presentation
                 slides_statement = select(SlideDB).where(
                     SlideDB.presentation_id == presentation_db.id
-                ).order_by(SlideDB.slide_order.asc())
+                ).order_by(SlideDB.__table__.c.slide_order.asc())
                 
                 slides_result = await session.execute(slides_statement)
                 slides_db = slides_result.scalars().all()

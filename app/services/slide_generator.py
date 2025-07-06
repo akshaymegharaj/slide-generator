@@ -8,7 +8,7 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 from pptx import Presentation as PPTXPresentation
 from pptx.util import Inches, Pt
-from pptx.enum.text import PP_ALIGN
+from pptx.enum.text import PP_ALIGN  # type: ignore
 from pptx.dml.color import RGBColor
 
 from app.models.presentation import Presentation, Slide, SlideType
@@ -143,7 +143,7 @@ class SlideGenerator:
         
         return filepath
     
-    def _apply_theme(self, pptx: PPTXPresentation, theme: Theme, aspect_ratio: AspectRatio = AspectRatio.WIDESCREEN_16_9, custom_width: Optional[float] = None, custom_height: Optional[float] = None):
+    def _apply_theme(self, pptx: PPTXPresentation, theme: Theme, aspect_ratio: AspectRatio = AspectRatio.WIDESCREEN_16_9, custom_width: Optional[float] = None, custom_height: Optional[float] = None):  # type: ignore
         """Apply theme to presentation with proper styling and aspect ratio"""
         # Set slide size based on aspect ratio
         if aspect_ratio == AspectRatio.CUSTOM and custom_width and custom_height:
@@ -303,7 +303,7 @@ class SlideGenerator:
         if presentation.font:
             p.font.name = presentation.font
 
-    def _create_title_slide(self, pptx: PPTXPresentation, slide_data: Slide, presentation: Presentation):
+    def _create_title_slide(self, pptx: PPTXPresentation, slide_data: Slide, presentation: Presentation):  # type: ignore
         """Create a title slide with aligned headings and overflow prevention"""
         slide_layout = pptx.slide_layouts[6]  # Blank layout for custom positioning
         slide = pptx.slides.add_slide(slide_layout)
@@ -381,7 +381,7 @@ class SlideGenerator:
         # Add citations if any
         self._add_citations_box(slide, slide_data.citations, presentation)
     
-    def _create_bullet_slide(self, pptx: PPTXPresentation, slide_data: Slide, presentation: Presentation):
+    def _create_bullet_slide(self, pptx: PPTXPresentation, slide_data: Slide, presentation: Presentation):  # type: ignore
         """Create a bullet points slide with center-aligned headings and left-aligned content"""
         slide_layout = pptx.slide_layouts[6]  # Blank layout for custom positioning
         slide = pptx.slides.add_slide(slide_layout)
@@ -464,7 +464,7 @@ class SlideGenerator:
         # Add citations if any
         self._add_citations_box(slide, slide_data.citations, presentation)
     
-    def _create_two_column_slide(self, pptx: PPTXPresentation, slide_data: Slide, presentation: Presentation):
+    def _create_two_column_slide(self, pptx: PPTXPresentation, slide_data: Slide, presentation: Presentation):  # type: ignore
         """Create a two-column slide with center-aligned headings and left-aligned content"""
         slide_layout = pptx.slide_layouts[6]  # Blank layout for custom positioning
         slide = pptx.slides.add_slide(slide_layout)
@@ -632,7 +632,7 @@ class SlideGenerator:
         # Add citations if any
         self._add_citations_box(slide, slide_data.citations, presentation)
     
-    def _create_content_with_image_slide(self, pptx: PPTXPresentation, slide_data: Slide, presentation: Presentation):
+    def _create_content_with_image_slide(self, pptx: PPTXPresentation, slide_data: Slide, presentation: Presentation):  # type: ignore
         """Create a content slide with center-aligned headings and left-aligned content"""
         slide_layout = pptx.slide_layouts[6]  # Blank layout for custom positioning
         slide = pptx.slides.add_slide(slide_layout)

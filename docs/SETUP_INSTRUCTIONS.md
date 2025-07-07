@@ -57,7 +57,7 @@ python -m app.main
 
 ## 8. Run Tests
 ```bash
-pytest
+python -m pytest tests/ -v
 ```
 
 ## 9. Demo & Examples

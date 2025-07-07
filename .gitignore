@@ -13,7 +13,6 @@ ENV/
 
 # Environment and secrets
 .env*
-app/settings.py
 
 # IDE/editor files
 .vscode/

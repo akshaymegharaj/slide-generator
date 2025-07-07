@@ -77,7 +77,7 @@ app/
 
 ## Testing
 ```bash
-pytest tests/ -v
+python -m pytest tests/ -v
 ```
 
 ## Future Scope

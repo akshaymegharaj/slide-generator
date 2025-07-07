@@ -56,9 +56,17 @@ python -m app.main
 - Interactive docs: `http://localhost:8000/docs`
 
 ## 8. Run Tests
+The tests are **integration tests** that require the server to be running.
+
 ```bash
+# Start the server first (in one terminal)
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Then run the tests (in another terminal)
 python -m pytest tests/ -v
 ```
+
+**Important**: These tests verify the complete API functionality by making actual HTTP requests to the running server. Make sure the server is running before executing the tests.
 
 ## 9. Demo & Examples
 - See `demo_middleware.py` for a demo script.

@@ -76,9 +76,17 @@ app/
 - See `docs/ENVIRONMENT_SETUP.md` for details
 
 ## Testing
+The tests in the `tests/` folder are **integration tests** that require the server to be running for successful execution.
+
 ```bash
+# Start the server first (in one terminal)
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Then run the tests (in another terminal)
 python -m pytest tests/ -v
 ```
+
+**Note**: These are integration tests that test the full API endpoints, not unit tests. They require the FastAPI server to be running to properly test the complete request-response cycle.
 
 ## Future Scope
 1. **Replace API calls with API + WebSocket or API + periodic lookup** - Handle long response times by implementing real-time communication or polling mechanisms
